@@ -8,8 +8,6 @@ return function (lazy_config)
     dependencies = {
       "williamboman/mason.nvim",
     },
-    init = function()
-    end
   })
 
   table.insert(lazy_config, {
@@ -32,6 +30,8 @@ return function (lazy_config)
       require('mason-lspconfig').setup({
         ensure_installed = {},
         handlers = {
+          -- this first function is the "default handler"
+          -- it applies to every language server without a "custom handler"
           function(server_name)
             require('lspconfig')[server_name].setup({})
           end,

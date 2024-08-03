@@ -4,9 +4,5 @@ return function (lazy_config)
     lazy = true
   })
 
-  table.insert(lazy_config, {
-    "famiu/bufdelete.nvim",
-  })
-
   return lazy_config
 end

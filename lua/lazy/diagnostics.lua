@@ -3,12 +3,12 @@ return {
   cmd = "Trouble",
   keys = {
     {
-      "<leader>xx",
+      "<Leader>xX",
       "<cmd>Trouble diagnostics toggle<cr>",
       desc = "Diagnostics (Trouble)",
     },
     {
-      "<leader>xX",
+      "<Leader>xx",
       "<cmd>Trouble diagnostics toggle filter.buf=0<cr>",
       desc = "Buffer Diagnostics (Trouble)",
     },
@@ -31,6 +31,19 @@ return {
       "<leader>xQ",
       "<cmd>Trouble qflist toggle<cr>",
       desc = "Quickfix List (Trouble)",
+    },
+  },
+  opts = {
+    modes = {
+      test = {
+        mode = "diagnostics",
+        preview = {
+          type = "split",
+          position = "right",
+          relative = "win",
+          size = 0.3,
+        },
+      },
     },
   },
 }
