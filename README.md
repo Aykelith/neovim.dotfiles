@@ -25,6 +25,14 @@ References:
 | **<Space>e** | n | `lua/lazy/file-explorer.lua` | neo-tree.nvim | Toggle file explorer |
 | **<Leader>xx** | n | `lua/lazy/diagnostics.lua` | trouble.nvim | Toggle diagnostics for current buffer |
 | **<Leader>xX** | n | `lua/lazy/diagnostics.lua` | trouble.nvim | Toggle diagnostics for all buffers |
+| **<C-y>** | i | ? | LSP | Apply the selected autocomplete option |
+| **gl** | n | `lua/lazy/lsp.lua:lsp_zero.default_keymaps` | lsp-zero | Show the diagnostics on the current line in a floating window |
+| **gd** | n | `lua/lazy/lsp.lua:lsp_zero.default_keymaps` | lsp-zero | Go to the definition of the symbol your cursor is on it |
+| **d** | Filesystem | `lua/lazy/file-explorer.lua` | neo-tree.nvim | Delete a file/dir (confirmation needed) |
+| **i** | Filesystem | `lua/lazy/file-explorer.lua` | neo-tree.nvim | Show details on that file/dir |
+| **l** | Filesystem | `lua/lazy/file-explorer.lua` | neo-tree.nvim | Show directory children |
+| **h** | Filesystem | `lua/lazy/file-explorer.lua` | neo-tree.nvim | Collapse directory children |
+| **H** | Filesystem | `lua/lazy/file-explorer.lua` | neo-tree.nvim | Collapse all directories |
 
 ## Plugins
 
