@@ -22,6 +22,9 @@ References:
 | **\<Leader>fb** | n | `lua/lazy/fuzzy-finder.lua` | Telescope | Open Telescope's buffer finder |
 | **\<Leader>fh** | n | `lua/lazy/fuzzy-finder.lua` | Telescope | Open Telescope's help finder  |
 | **\<Leader>fu** | n | `lua/lazy/fuzzy-finder.lua` | Telescope | Open Telescope's undo stack |
+| **\<C-Up>** | Telescope | `lua/lazy/fuzzy-finder.lua` | Telescope | Move up in the history of searched phrases |
+| **\<C-Down>** | Telescope | `lua/lazy/fuzzy-finder.lua` | Telescope | Move down in the history of searched phrases |
+| **\<C-k>** | Telescope:Grep finder | `lua/lazy/fuzzy-finder.lua` | Telescope | Quote the word under cursor |
 | **\<Space>e** | n | `lua/lazy/file-explorer.lua` | neo-tree.nvim | Toggle file explorer |
 | **\<Leader>xx** | n | `lua/lazy/diagnostics.lua` | trouble.nvim | Toggle diagnostics for current buffer |
 | **\<Leader>xX** | n | `lua/lazy/diagnostics.lua` | trouble.nvim | Toggle diagnostics for all buffers |
