@@ -1,13 +1,11 @@
 local config = {
-  "sainnhe/sonokai",
-  name = "sonokai",
+  "catppuccin/nvim",
+  name = "catppuccin",
   lazy = false,
   priority = 1000,
   config = function()
     -- load the colorscheme here
-    -- vim.g.sonokai_style = "sushia"
-    vim.g.sonokai_enable_italic = true
-    vim.cmd([[colorscheme sonokai]])
+    vim.cmd([[colorscheme catppuccin-macchiato]])
   end,
 }
 
