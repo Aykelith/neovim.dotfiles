@@ -41,7 +41,7 @@ return {
           ["w"] = "open_with_window_picker",
           ["h"] = "close_node",
           ["H"] = "close_all_nodes",
-          ["a"] = { 
+          ["a"] = {
             "add",
             -- this command supports BASH style brace expansion ("x{a,b,c}" -> xa,xb,xc). see `:h neo-tree-file-actions` for details
             -- some commands may take optional config options, see `:h neo-tree-mappings` for details
@@ -73,6 +73,7 @@ return {
       },
       filesystem = {
         filtered_items = {
+          visible = true,
           hide_dotfiles = false,
           hide_hidden = false
         },
