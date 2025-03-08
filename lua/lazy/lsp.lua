@@ -1,10 +1,12 @@
 return function (lazy_config)
   table.insert(lazy_config, {
-    "williamboman/mason.nvim"
+    "williamboman/mason.nvim",
+    commit = "fc98833"
   })
 
   table.insert(lazy_config, {
     "williamboman/mason-lspconfig.nvim",
+    commit = "1a31f82",
     dependencies = {
       "williamboman/mason.nvim",
     },

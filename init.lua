@@ -23,6 +23,7 @@ local lazy_config = {
   require("lazy/tree-sitter"),
   require("lazy/status-line"),
   require("lazy/diagnostics"),
+  require("lazy/git"),
 }
 
 lazy_config = require("lazy/others")(lazy_config)

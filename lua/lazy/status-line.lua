@@ -1,5 +1,6 @@
 return {
   "nvim-lualine/lualine.nvim",
+  commit = "f4f791f",
   dependencies = {
     "nvim-tree/nvim-web-devicons",
     "folke/trouble.nvim"
