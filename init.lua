@@ -15,6 +15,12 @@ require("options")
 require("win-move")
 require("keymaps")
 
+vim.filetype.add({
+  extension = {
+    mdx = 'markdown',
+  },
+})
+
 local lazy_config = {
   require("lazy/colorscheme"),
   require("lazy/tabline"),
