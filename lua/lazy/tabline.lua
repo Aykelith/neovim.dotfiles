@@ -1,6 +1,6 @@
 local config = {
   "romgrk/barbar.nvim",
-  commit = "807bede",
+  commit = "53b5a2f",
   dependencies = {
     "nvim-tree/nvim-web-devicons"
   },

@@ -1,7 +1,7 @@
 return {
   "nvim-neo-tree/neo-tree.nvim",
   branch = "v3.x",
-  commit = "16854ed",
+  commit = "f3df514",
   dependencies = {
     "nvim-lua/plenary.nvim",
     "kyazdani42/nvim-web-devicons",

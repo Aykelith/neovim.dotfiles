@@ -1,7 +1,7 @@
 local config = {
   "catppuccin/nvim",
   name = "catppuccin",
-  commit = "5b5e3ae",
+  commit = "cb56659",
   lazy = false,
   priority = 1000,
   config = function()

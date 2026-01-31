@@ -1,6 +1,6 @@
 return {
   "folke/trouble.nvim",
-  commit = "85bedb7",
+  tag = "v3.7.1",
   cmd = "Trouble",
   keys = {
     {
