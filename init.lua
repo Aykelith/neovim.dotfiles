@@ -22,6 +22,7 @@ vim.filetype.add({
 })
 
 local lazy_config = {
+  require("lazy/lsp"),
   require("lazy/colorscheme"),
   require("lazy/tabline"),
   require("lazy/file-explorer"),
@@ -30,9 +31,16 @@ local lazy_config = {
   require("lazy/status-line"),
   require("lazy/diagnostics"),
   require("lazy/git"),
+  require("lazy/others"),
 }
 
-lazy_config = require("lazy/others")(lazy_config)
-lazy_config = require("lazy/lsp")(lazy_config)
-
 require("lazy").setup(lazy_config)
+
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = { '<filetype>' },
+  callback = function()
+    vim.treesitter.start()
+    vim.wo[0][0].foldexpr = 'v:lua.vim.treesitter.foldexpr()'
+    vim.wo[0][0].foldmethod = 'expr'
+  end,
+})

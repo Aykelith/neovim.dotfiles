@@ -1,11 +1,9 @@
 return {
   "nvim-treesitter/nvim-treesitter",
-  commit = "f8bbc31",
+  lazy = false,
+  commit = "19c729d",
   build = ":TSUpdate",
   init = function ()
-    require("nvim-treesitter").setup({
-      ensure_installed = { "lua", "jsdoc", "json", "css", "scss", "markdown", "rust", "go" },
-      highlight = { enable = true }
-    })
+    require("nvim-treesitter").install { "lua", "jsdoc", "json", "css", "scss", "markdown", "rust", "go" }
   end
 }
