@@ -3,100 +3,107 @@
 A starter template for [LazyVim](https://github.com/LazyVim/LazyVim).
 Refer to the [documentation](https://lazyvim.github.io/installation) to get started.
 
+## Tips
+
+### Format tables in Markdown
+
+1. Select the table
+2. `!column -t -s '|' -o '|'`
+
 ## General
 
-| Key | Description | Mode |
-| --- | --- | --- |
-| <code>j</code> | Down | **n**, **x** |
-| <code>&lt;Down&gt;</code> | Down | **n**, **x** |
-| <code>k</code> | Up | **n**, **x** |
-| <code>&lt;Up&gt;</code> | Up | **n**, **x** |
-| <code>&lt;C-h&gt;</code> | Go to Left Window | **n** |
-| <code>&lt;C-j&gt;</code> | Go to Lower Window | **n** |
-| <code>&lt;C-k&gt;</code> | Go to Upper Window | **n** |
-| <code>&lt;C-l&gt;</code> | Go to Right Window | **n** |
-| <code>&lt;C-Up&gt;</code> | Increase Window Height | **n** |
-| <code>&lt;C-Down&gt;</code> | Decrease Window Height | **n** |
-| <code>&lt;C-Left&gt;</code> | Decrease Window Width | **n** |
-| <code>&lt;C-Right&gt;</code> | Increase Window Width | **n** |
-| <code>&lt;A-j&gt;</code> | Move Down | **n**, **i**, **v** |
-| <code>&lt;A-k&gt;</code> | Move Up | **n**, **i**, **v** |
-| <code>&lt;S-h&gt;</code> | Prev Buffer | **n** |
-| <code>&lt;S-l&gt;</code> | Next Buffer | **n** |
-| <code>[b</code> | Prev Buffer | **n** |
-| <code>]b</code> | Next Buffer | **n** |
-| <code>&lt;leader&gt;bb</code> | Switch to Other Buffer | **n** |
-| <code>&lt;leader&gt;`</code> | Switch to Other Buffer | **n** |
-| <code>&lt;leader&gt;bd</code> | Delete Buffer | **n** |
-| <code>&lt;leader&gt;bo</code> | Delete Other Buffers | **n** |
-| <code>&lt;leader&gt;bD</code> | Delete Buffer and Window | **n** |
-| <code>&lt;esc&gt;</code> | Escape and Clear hlsearch | **i**, **n**, **s** |
-| <code>&lt;leader&gt;ur</code> | Redraw / Clear hlsearch / Diff Update | **n** |
-| <code>n</code> | Next Search Result | **n**, **x**, **o** |
-| <code>N</code> | Prev Search Result | **n**, **x**, **o** |
-| <code>&lt;C-s&gt;</code> | Save File | **i**, **x**, **n**, **s** |
-| <code>&lt;leader&gt;K</code> | Keywordprg | **n** |
-| <code>gco</code> | Add Comment Below | **n** |
-| <code>gcO</code> | Add Comment Above | **n** |
-| <code>&lt;leader&gt;l</code> | Lazy | **n** |
-| <code>&lt;leader&gt;fn</code> | New File | **n** |
-| <code>&lt;leader&gt;xl</code> | Location List | **n** |
-| <code>&lt;leader&gt;xq</code> | Quickfix List | **n** |
-| <code>[q</code> | Previous Quickfix | **n** |
-| <code>]q</code> | Next Quickfix | **n** |
-| <code>&lt;leader&gt;cf</code> | Format | **n**, **x** |
-| <code>&lt;leader&gt;cd</code> | Line Diagnostics | **n** |
-| <code>]d</code> | Next Diagnostic | **n** |
-| <code>[d</code> | Prev Diagnostic | **n** |
-| <code>]e</code> | Next Error | **n** |
-| <code>[e</code> | Prev Error | **n** |
-| <code>]w</code> | Next Warning | **n** |
-| <code>[w</code> | Prev Warning | **n** |
-| <code>&lt;leader&gt;uf</code> | Toggle Auto Format (Global) | **n** |
-| <code>&lt;leader&gt;uF</code> | Toggle Auto Format (Buffer) | **n** |
-| <code>&lt;leader&gt;us</code> | Toggle Spelling | **n** |
-| <code>&lt;leader&gt;uw</code> | Toggle Wrap | **n** |
-| <code>&lt;leader&gt;uL</code> | Toggle Relative Number | **n** |
-| <code>&lt;leader&gt;ud</code> | Toggle Diagnostics | **n** |
-| <code>&lt;leader&gt;ul</code> | Toggle Line Numbers | **n** |
-| <code>&lt;leader&gt;uc</code> | Toggle Conceal Level | **n** |
-| <code>&lt;leader&gt;uA</code> | Toggle Tabline | **n** |
-| <code>&lt;leader&gt;uT</code> | Toggle Treesitter Highlight | **n** |
-| <code>&lt;leader&gt;ub</code> | Toggle Dark Background | **n** |
-| <code>&lt;leader&gt;uD</code> | Toggle Dimming | **n** |
-| <code>&lt;leader&gt;ua</code> | Toggle Animations | **n** |
-| <code>&lt;leader&gt;ug</code> | Toggle Indent Guides | **n** |
-| <code>&lt;leader&gt;uS</code> | Toggle Smooth Scroll | **n** |
-| <code>&lt;leader&gt;dpp</code> | Toggle Profiler | **n** |
-| <code>&lt;leader&gt;dph</code> | Toggle Profiler Highlights | **n** |
-| <code>&lt;leader&gt;uh</code> | Toggle Inlay Hints | **n** |
-| <code>&lt;leader&gt;gL</code> | Git Log (cwd) | **n** |
-| <code>&lt;leader&gt;gb</code> | Git Blame Line | **n** |
-| <code>&lt;leader&gt;gf</code> | Git Current File History | **n** |
-| <code>&lt;leader&gt;gl</code> | Git Log | **n** |
-| <code>&lt;leader&gt;gB</code> | Git Browse (open) | **n**, **x** |
-| <code>&lt;leader&gt;gY</code> | Git Browse (copy) | **n**, **x** |
-| <code>&lt;leader&gt;qq</code> | Quit All | **n** |
-| <code>&lt;leader&gt;ui</code> | Inspect Pos | **n** |
-| <code>&lt;leader&gt;uI</code> | Inspect Tree | **n** |
-| <code>&lt;leader&gt;L</code> | LazyVim Changelog | **n** |
-| <code>&lt;leader&gt;fT</code> | Terminal (cwd) | **n** |
-| <code>&lt;leader&gt;ft</code> | Terminal (Root Dir) | **n** |
-| <code>&lt;c-/&gt;</code> | Terminal (Root Dir) | **n**, **t** |
-| <code>&lt;c-_&gt;</code> | which_key_ignore | **n**, **t** |
-| <code>&lt;leader&gt;-</code> | Split Window Below | **n** |
-| <code>&lt;leader&gt;&vert;</code> | Split Window Right | **n** |
-| <code>&lt;leader&gt;wd</code> | Delete Window | **n** |
-| <code>&lt;leader&gt;wm</code> | Toggle Zoom Mode | **n** |
-| <code>&lt;leader&gt;uZ</code> | Toggle Zoom Mode | **n** |
-| <code>&lt;leader&gt;uz</code> | Toggle Zen Mode | **n** |
-| <code>&lt;leader&gt;&lt;tab&gt;l</code> | Last Tab | **n** |
-| <code>&lt;leader&gt;&lt;tab&gt;o</code> | Close Other Tabs | **n** |
-| <code>&lt;leader&gt;&lt;tab&gt;f</code> | First Tab | **n** |
-| <code>&lt;leader&gt;&lt;tab&gt;&lt;tab&gt;</code> | New Tab | **n** |
-| <code>&lt;leader&gt;&lt;tab&gt;]</code> | Next Tab | **n** |
-| <code>&lt;leader&gt;&lt;tab&gt;d</code> | Close Tab | **n** |
-| <code>&lt;leader&gt;&lt;tab&gt;[</code> | Previous Tab | **n** |
+| Key                                               | Description                           | Mode                       |
+| ---                                               | ---                                   | ---                        |
+| <code>j</code>                                    | Down                                  | **n**, **x**               |
+| <code>&lt;Down&gt;</code>                         | Down                                  | **n**, **x**               |
+| <code>k</code>                                    | Up                                    | **n**, **x**               |
+| <code>&lt;Up&gt;</code>                           | Up                                    | **n**, **x**               |
+| <code>&lt;C-h&gt;</code>                          | Go to Left Window                     | **n**                      |
+| <code>&lt;C-j&gt;</code>                          | Go to Lower Window                    | **n**                      |
+| <code>&lt;C-k&gt;</code>                          | Go to Upper Window                    | **n**                      |
+| <code>&lt;C-l&gt;</code>                          | Go to Right Window                    | **n**                      |
+| <code>&lt;C-Up&gt;</code>                         | Increase Window Height                | **n**                      |
+| <code>&lt;C-Down&gt;</code>                       | Decrease Window Height                | **n**                      |
+| <code>&lt;C-Left&gt;</code>                       | Decrease Window Width                 | **n**                      |
+| <code>&lt;C-Right&gt;</code>                      | Increase Window Width                 | **n**                      |
+| <code>&lt;A-j&gt;</code>                          | Move Down                             | **n**, **i**, **v**        |
+| <code>&lt;A-k&gt;</code>                          | Move Up                               | **n**, **i**, **v**        |
+| <code>&lt;S-h&gt;</code>                          | Prev Buffer                           | **n**                      |
+| <code>&lt;S-l&gt;</code>                          | Next Buffer                           | **n**                      |
+| <code>[b</code>                                   | Prev Buffer                           | **n**                      |
+| <code>]b</code>                                   | Next Buffer                           | **n**                      |
+| <code>&lt;leader&gt;bb</code>                     | Switch to Other Buffer                | **n**                      |
+| <code>&lt;leader&gt;`</code>                      | Switch to Other Buffer                | **n**                      |
+| <code>&lt;leader&gt;bd</code>                     | Delete Buffer                         | **n**                      |
+| <code>&lt;leader&gt;bo</code>                     | Delete Other Buffers                  | **n**                      |
+| <code>&lt;leader&gt;bD</code>                     | Delete Buffer and Window              | **n**                      |
+| <code>&lt;esc&gt;</code>                          | Escape and Clear hlsearch             | **i**, **n**, **s**        |
+| <code>&lt;leader&gt;ur</code>                     | Redraw / Clear hlsearch / Diff Update | **n**                      |
+| <code>n</code>                                    | Next Search Result                    | **n**, **x**, **o**        |
+| <code>N</code>                                    | Prev Search Result                    | **n**, **x**, **o**        |
+| <code>&lt;C-s&gt;</code>                          | Save File                             | **i**, **x**, **n**, **s** |
+| <code>&lt;leader&gt;K</code>                      | Keywordprg                            | **n**                      |
+| <code>gco</code>                                  | Add Comment Below                     | **n**                      |
+| <code>gcO</code>                                  | Add Comment Above                     | **n**                      |
+| <code>&lt;leader&gt;l</code>                      | Lazy                                  | **n**                      |
+| <code>&lt;leader&gt;fn</code>                     | New File                              | **n**                      |
+| <code>&lt;leader&gt;xl</code>                     | Location List                         | **n**                      |
+| <code>&lt;leader&gt;xq</code>                     | Quickfix List                         | **n**                      |
+| <code>[q</code>                                   | Previous Quickfix                     | **n**                      |
+| <code>]q</code>                                   | Next Quickfix                         | **n**                      |
+| <code>&lt;leader&gt;cf</code>                     | Format                                | **n**, **x**               |
+| <code>&lt;leader&gt;cd</code>                     | Line Diagnostics                      | **n**                      |
+| <code>]d</code>                                   | Next Diagnostic                       | **n**                      |
+| <code>[d</code>                                   | Prev Diagnostic                       | **n**                      |
+| <code>]e</code>                                   | Next Error                            | **n**                      |
+| <code>[e</code>                                   | Prev Error                            | **n**                      |
+| <code>]w</code>                                   | Next Warning                          | **n**                      |
+| <code>[w</code>                                   | Prev Warning                          | **n**                      |
+| <code>&lt;leader&gt;uf</code>                     | Toggle Auto Format (Global)           | **n**                      |
+| <code>&lt;leader&gt;uF</code>                     | Toggle Auto Format (Buffer)           | **n**                      |
+| <code>&lt;leader&gt;us</code>                     | Toggle Spelling                       | **n**                      |
+| <code>&lt;leader&gt;uw</code>                     | Toggle Wrap                           | **n**                      |
+| <code>&lt;leader&gt;uL</code>                     | Toggle Relative Number                | **n**                      |
+| <code>&lt;leader&gt;ud</code>                     | Toggle Diagnostics                    | **n**                      |
+| <code>&lt;leader&gt;ul</code>                     | Toggle Line Numbers                   | **n**                      |
+| <code>&lt;leader&gt;uc</code>                     | Toggle Conceal Level                  | **n**                      |
+| <code>&lt;leader&gt;uA</code>                     | Toggle Tabline                        | **n**                      |
+| <code>&lt;leader&gt;uT</code>                     | Toggle Treesitter Highlight           | **n**                      |
+| <code>&lt;leader&gt;ub</code>                     | Toggle Dark Background                | **n**                      |
+| <code>&lt;leader&gt;uD</code>                     | Toggle Dimming                        | **n**                      |
+| <code>&lt;leader&gt;ua</code>                     | Toggle Animations                     | **n**                      |
+| <code>&lt;leader&gt;ug</code>                     | Toggle Indent Guides                  | **n**                      |
+| <code>&lt;leader&gt;uS</code>                     | Toggle Smooth Scroll                  | **n**                      |
+| <code>&lt;leader&gt;dpp</code>                    | Toggle Profiler                       | **n**                      |
+| <code>&lt;leader&gt;dph</code>                    | Toggle Profiler Highlights            | **n**                      |
+| <code>&lt;leader&gt;uh</code>                     | Toggle Inlay Hints                    | **n**                      |
+| <code>&lt;leader&gt;gL</code>                     | Git Log (cwd)                         | **n**                      |
+| <code>&lt;leader&gt;gb</code>                     | Git Blame Line                        | **n**                      |
+| <code>&lt;leader&gt;gf</code>                     | Git Current File History              | **n**                      |
+| <code>&lt;leader&gt;gl</code>                     | Git Log                               | **n**                      |
+| <code>&lt;leader&gt;gB</code>                     | Git Browse (open)                     | **n**, **x**               |
+| <code>&lt;leader&gt;gY</code>                     | Git Browse (copy)                     | **n**, **x**               |
+| <code>&lt;leader&gt;qq</code>                     | Quit All                              | **n**                      |
+| <code>&lt;leader&gt;ui</code>                     | Inspect Pos                           | **n**                      |
+| <code>&lt;leader&gt;uI</code>                     | Inspect Tree                          | **n**                      |
+| <code>&lt;leader&gt;L</code>                      | LazyVim Changelog                     | **n**                      |
+| <code>&lt;leader&gt;fT</code>                     | Terminal (cwd)                        | **n**                      |
+| <code>&lt;leader&gt;ft</code>                     | Terminal (Root Dir)                   | **n**                      |
+| <code>&lt;c-/&gt;</code>                          | Terminal (Root Dir)                   | **n**, **t**               |
+| <code>&lt;c-_&gt;</code>                          | which_key_ignore                      | **n**, **t**               |
+| <code>&lt;leader&gt;-</code>                      | Split Window Below                    | **n**                      |
+| <code>&lt;leader&gt;&vert;</code>                 | Split Window Right                    | **n**                      |
+| <code>&lt;leader&gt;wd</code>                     | Delete Window                         | **n**                      |
+| <code>&lt;leader&gt;wm</code>                     | Toggle Zoom Mode                      | **n**                      |
+| <code>&lt;leader&gt;uZ</code>                     | Toggle Zoom Mode                      | **n**                      |
+| <code>&lt;leader&gt;uz</code>                     | Toggle Zen Mode                       | **n**                      |
+| <code>&lt;leader&gt;&lt;tab&gt;l</code>           | Last Tab                              | **n**                      |
+| <code>&lt;leader&gt;&lt;tab&gt;o</code>           | Close Other Tabs                      | **n**                      |
+| <code>&lt;leader&gt;&lt;tab&gt;f</code>           | First Tab                             | **n**                      |
+| <code>&lt;leader&gt;&lt;tab&gt;&lt;tab&gt;</code> | New Tab                               | **n**                      |
+| <code>&lt;leader&gt;&lt;tab&gt;]</code>           | Next Tab                              | **n**                      |
+| <code>&lt;leader&gt;&lt;tab&gt;d</code>           | Close Tab                             | **n**                      |
+| <code>&lt;leader&gt;&lt;tab&gt;[</code>           | Previous Tab                          | **n**                      |
 
 ## LSP
 
@@ -286,6 +293,7 @@ Refer to the [documentation](https://lazyvim.github.io/installation) to get star
 | <code>&lt;leader&gt;?</code> | Buffer Keymaps (which-key) | **n** |
 
 ## [avante.nvim](https://github.com/yetone/avante.nvim.git)
+
 Part of [lazyvim.plugins.extras.ai.avante](/extras/ai/avante)
 
 | Key | Description | Mode |
@@ -303,6 +311,7 @@ Part of [lazyvim.plugins.extras.ai.avante](/extras/ai/avante)
 | <code>&lt;leader&gt;at</code> | Toggle Avante | **n** |
 
 ## [claudecode.nvim](https://github.com/coder/claudecode.nvim.git)
+
 Part of [lazyvim.plugins.extras.ai.claudecode](/extras/ai/claudecode)
 
 | Key | Description | Mode |
@@ -319,6 +328,7 @@ Part of [lazyvim.plugins.extras.ai.claudecode](/extras/ai/claudecode)
 | <code>&lt;leader&gt;as</code> | Send to Claude | **v** |
 
 ## [CopilotChat.nvim](https://github.com/CopilotC-Nvim/CopilotChat.nvim.git)
+
 Part of [lazyvim.plugins.extras.ai.copilot-chat](/extras/ai/copilot-chat)
 
 | Key | Description | Mode |
@@ -331,6 +341,7 @@ Part of [lazyvim.plugins.extras.ai.copilot-chat](/extras/ai/copilot-chat)
 | <code>&lt;leader&gt;ax</code> | Clear (CopilotChat) | **n**, **x** |
 
 ## [sidekick.nvim](https://github.com/folke/sidekick.nvim.git)
+
 Part of [lazyvim.plugins.extras.ai.sidekick](/extras/ai/sidekick)
 
 | Key | Description | Mode |
@@ -346,6 +357,7 @@ Part of [lazyvim.plugins.extras.ai.sidekick](/extras/ai/sidekick)
 | <code>&lt;c-.&gt;</code> | Sidekick Toggle | **n**, **i**, **t**, **x** |
 
 ## [mini.surround](https://github.com/nvim-mini/mini.surround.git)
+
 Part of [lazyvim.plugins.extras.coding.mini-surround](/extras/coding/mini-surround)
 
 | Key | Description | Mode |
@@ -359,6 +371,7 @@ Part of [lazyvim.plugins.extras.coding.mini-surround](/extras/coding/mini-surrou
 | <code>gsr</code> | Replace Surrounding | **n** |
 
 ## [neogen](https://github.com/danymat/neogen.git)
+
 Part of [lazyvim.plugins.extras.coding.neogen](/extras/coding/neogen)
 
 | Key | Description | Mode |
@@ -366,6 +379,7 @@ Part of [lazyvim.plugins.extras.coding.neogen](/extras/coding/neogen)
 | <code>&lt;leader&gt;cn</code> | Generate Annotations (Neogen) | **n** |
 
 ## [yanky.nvim](https://github.com/gbprod/yanky.nvim.git)
+
 Part of [lazyvim.plugins.extras.coding.yanky](/extras/coding/yanky)
 
 | Key | Description | Mode |
@@ -390,6 +404,7 @@ Part of [lazyvim.plugins.extras.coding.yanky](/extras/coding/yanky)
 | <code>y</code> | Yank Text | **n**, **x** |
 
 ## [nvim-dap](https://github.com/mfussenegger/nvim-dap.git)
+
 Part of [lazyvim.plugins.extras.dap.core](/extras/dap/core)
 
 | Key | Description | Mode |
@@ -413,6 +428,7 @@ Part of [lazyvim.plugins.extras.dap.core](/extras/dap/core)
 | <code>&lt;leader&gt;dw</code> | Widgets | **n** |
 
 ## [nvim-dap-ui](https://github.com/rcarriga/nvim-dap-ui.git)
+
 Part of [lazyvim.plugins.extras.dap.core](/extras/dap/core)
 
 | Key | Description | Mode |
@@ -421,6 +437,7 @@ Part of [lazyvim.plugins.extras.dap.core](/extras/dap/core)
 | <code>&lt;leader&gt;du</code> | Dap UI | **n** |
 
 ## [aerial.nvim](https://github.com/stevearc/aerial.nvim.git)
+
 Part of [lazyvim.plugins.extras.editor.aerial](/extras/editor/aerial)
 
 | Key | Description | Mode |
@@ -428,6 +445,7 @@ Part of [lazyvim.plugins.extras.editor.aerial](/extras/editor/aerial)
 | <code>&lt;leader&gt;cs</code> | Aerial (Symbols) | **n** |
 
 ## [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim.git)
+
 Part of [lazyvim.plugins.extras.editor.aerial](/extras/editor/aerial)
 
 | Key | Description | Mode |
@@ -435,6 +453,7 @@ Part of [lazyvim.plugins.extras.editor.aerial](/extras/editor/aerial)
 | <code>&lt;leader&gt;ss</code> | Goto Symbol (Aerial) | **n** |
 
 ## [dial.nvim](https://github.com/monaqa/dial.nvim.git)
+
 Part of [lazyvim.plugins.extras.editor.dial](/extras/editor/dial)
 
 | Key | Description | Mode |
@@ -445,6 +464,7 @@ Part of [lazyvim.plugins.extras.editor.dial](/extras/editor/dial)
 | <code>g&lt;C-x&gt;</code> | Decrement | **n**, **x** |
 
 ## [harpoon](https://github.com/ThePrimeagen/harpoon.git)
+
 Part of [lazyvim.plugins.extras.editor.harpoon2](/extras/editor/harpoon2)
 
 | Key | Description | Mode |
@@ -462,6 +482,7 @@ Part of [lazyvim.plugins.extras.editor.harpoon2](/extras/editor/harpoon2)
 | <code>&lt;leader&gt;H</code> | Harpoon File | **n** |
 
 ## [vim-illuminate](https://github.com/RRethy/vim-illuminate.git)
+
 Part of [lazyvim.plugins.extras.editor.illuminate](/extras/editor/illuminate)
 
 | Key | Description | Mode |
@@ -470,6 +491,7 @@ Part of [lazyvim.plugins.extras.editor.illuminate](/extras/editor/illuminate)
 | <code>]]</code> | Next Reference | **n** |
 
 ## [leap.nvim](https://github.com/ggandor/leap.nvim.git)
+
 Part of [lazyvim.plugins.extras.editor.leap](/extras/editor/leap)
 
 | Key | Description | Mode |
@@ -479,6 +501,7 @@ Part of [lazyvim.plugins.extras.editor.leap](/extras/editor/leap)
 | <code>S</code> | Leap Backward to | **n**, **o**, **x** |
 
 ## [mini.surround](https://github.com/nvim-mini/mini.surround.git)
+
 Part of [lazyvim.plugins.extras.editor.leap](/extras/editor/leap)
 
 | Key | Description | Mode |
@@ -486,6 +509,7 @@ Part of [lazyvim.plugins.extras.editor.leap](/extras/editor/leap)
 | <code>gz</code> | +surround | **n** |
 
 ## [mini.diff](https://github.com/nvim-mini/mini.diff.git)
+
 Part of [lazyvim.plugins.extras.editor.mini-diff](/extras/editor/mini-diff)
 
 | Key | Description | Mode |
@@ -493,6 +517,7 @@ Part of [lazyvim.plugins.extras.editor.mini-diff](/extras/editor/mini-diff)
 | <code>&lt;leader&gt;go</code> | Toggle mini.diff overlay | **n** |
 
 ## [mini.files](https://github.com/nvim-mini/mini.files.git)
+
 Part of [lazyvim.plugins.extras.editor.mini-files](/extras/editor/mini-files)
 
 | Key | Description | Mode |
@@ -501,6 +526,7 @@ Part of [lazyvim.plugins.extras.editor.mini-files](/extras/editor/mini-files)
 | <code>&lt;leader&gt;fM</code> | Open mini.files (cwd) | **n** |
 
 ## [outline.nvim](https://github.com/hedyhli/outline.nvim.git)
+
 Part of [lazyvim.plugins.extras.editor.outline](/extras/editor/outline)
 
 | Key | Description | Mode |
@@ -508,6 +534,7 @@ Part of [lazyvim.plugins.extras.editor.outline](/extras/editor/outline)
 | <code>&lt;leader&gt;cs</code> | Toggle Outline | **n** |
 
 ## [overseer.nvim](https://github.com/stevearc/overseer.nvim.git)
+
 Part of [lazyvim.plugins.extras.editor.overseer](/extras/editor/overseer)
 
 | Key | Description | Mode |
@@ -521,6 +548,7 @@ Part of [lazyvim.plugins.extras.editor.overseer](/extras/editor/overseer)
 | <code>&lt;leader&gt;ow</code> | Task list | **n** |
 
 ## [refactoring.nvim](https://github.com/ThePrimeagen/refactoring.nvim.git)
+
 Part of [lazyvim.plugins.extras.editor.refactoring](/extras/editor/refactoring)
 
 | Key | Description | Mode |
@@ -537,6 +565,7 @@ Part of [lazyvim.plugins.extras.editor.refactoring](/extras/editor/refactoring)
 | <code>&lt;leader&gt;rx</code> | Extract Variable | **n**, **x** |
 
 ## [snacks.nvim](https://github.com/folke/snacks.nvim.git)
+
 Part of [lazyvim.plugins.extras.editor.snacks_explorer](/extras/editor/snacks_explorer)
 
 | Key | Description | Mode |
@@ -547,6 +576,7 @@ Part of [lazyvim.plugins.extras.editor.snacks_explorer](/extras/editor/snacks_ex
 | <code>&lt;leader&gt;fE</code> | Explorer Snacks (cwd) | **n** |
 
 ## [snacks.nvim](https://github.com/folke/snacks.nvim.git)
+
 Part of [lazyvim.plugins.extras.editor.snacks_picker](/extras/editor/snacks_picker)
 
 | Key | Description | Mode |
@@ -601,6 +631,7 @@ Part of [lazyvim.plugins.extras.editor.snacks_picker](/extras/editor/snacks_pick
 | <code>&lt;leader&gt;uC</code> | Colorschemes | **n** |
 
 ## [todo-comments.nvim](https://github.com/folke/todo-comments.nvim.git)
+
 Part of [lazyvim.plugins.extras.editor.snacks_picker](/extras/editor/snacks_picker)
 
 | Key | Description | Mode |
@@ -609,6 +640,7 @@ Part of [lazyvim.plugins.extras.editor.snacks_picker](/extras/editor/snacks_pick
 | <code>&lt;leader&gt;sT</code> | Todo/Fix/Fixme | **n** |
 
 ## [nvim-ansible](https://github.com/mfussenegger/nvim-ansible.git)
+
 Part of [lazyvim.plugins.extras.lang.ansible](/extras/lang/ansible)
 
 | Key | Description | Mode |
@@ -616,6 +648,7 @@ Part of [lazyvim.plugins.extras.lang.ansible](/extras/lang/ansible)
 | <code>&lt;leader&gt;ta</code> | Ansible Run Playbook/Role | **n** |
 
 ## [haskell-tools.nvim](https://github.com/mrcjkb/haskell-tools.nvim.git)
+
 Part of [lazyvim.plugins.extras.lang.haskell](/extras/lang/haskell)
 
 | Key | Description | Mode |
@@ -626,6 +659,7 @@ Part of [lazyvim.plugins.extras.lang.haskell](/extras/lang/haskell)
 | <code>&lt;localleader&gt;R</code> | REPL (Buffer) | **n** |
 
 ## [telescope_hoogle](https://github.com/luc-tielen/telescope_hoogle.git)
+
 Part of [lazyvim.plugins.extras.lang.haskell](/extras/lang/haskell)
 
 | Key | Description | Mode |
@@ -633,6 +667,7 @@ Part of [lazyvim.plugins.extras.lang.haskell](/extras/lang/haskell)
 | <code>&lt;localleader&gt;H</code> | Hoogle | **n** |
 
 ## [markdown-preview.nvim](https://github.com/iamcco/markdown-preview.nvim.git)
+
 Part of [lazyvim.plugins.extras.lang.markdown](/extras/lang/markdown)
 
 | Key | Description | Mode |
@@ -640,6 +675,7 @@ Part of [lazyvim.plugins.extras.lang.markdown](/extras/lang/markdown)
 | <code>&lt;leader&gt;cp</code> | Markdown Preview | **n** |
 
 ## [nvim-dap-python](https://github.com/mfussenegger/nvim-dap-python.git)
+
 Part of [lazyvim.plugins.extras.lang.python](/extras/lang/python)
 
 | Key | Description | Mode |
@@ -648,6 +684,7 @@ Part of [lazyvim.plugins.extras.lang.python](/extras/lang/python)
 | <code>&lt;leader&gt;dPt</code> | Debug Method | **n** |
 
 ## [venv-selector.nvim](https://github.com/linux-cultist/venv-selector.nvim.git)
+
 Part of [lazyvim.plugins.extras.lang.python](/extras/lang/python)
 
 | Key | Description | Mode |
@@ -655,6 +692,7 @@ Part of [lazyvim.plugins.extras.lang.python](/extras/lang/python)
 | <code>&lt;leader&gt;cv</code> | Select VirtualEnv | **n** |
 
 ## [nvim-metals](https://github.com/scalameta/nvim-metals.git)
+
 Part of [lazyvim.plugins.extras.lang.scala](/extras/lang/scala)
 
 | Key | Description | Mode |
@@ -664,6 +702,7 @@ Part of [lazyvim.plugins.extras.lang.scala](/extras/lang/scala)
 | <code>&lt;leader&gt;mh</code> | Metals hover worksheet | **n** |
 
 ## [vim-dadbod-ui](https://github.com/kristijanhusak/vim-dadbod-ui.git)
+
 Part of [lazyvim.plugins.extras.lang.sql](/extras/lang/sql)
 
 | Key | Description | Mode |
@@ -671,6 +710,7 @@ Part of [lazyvim.plugins.extras.lang.sql](/extras/lang/sql)
 | <code>&lt;leader&gt;D</code> | Toggle DBUI | **n** |
 
 ## [vimtex](https://github.com/lervag/vimtex.git)
+
 Part of [lazyvim.plugins.extras.lang.tex](/extras/lang/tex)
 
 | Key | Description | Mode |
@@ -678,6 +718,7 @@ Part of [lazyvim.plugins.extras.lang.tex](/extras/lang/tex)
 | <code>&lt;localLeader&gt;l</code> | +vimtex | **n** |
 
 ## [typst-preview.nvim](https://github.com/chomosuke/typst-preview.nvim.git)
+
 Part of [lazyvim.plugins.extras.lang.typst](/extras/lang/typst)
 
 | Key | Description | Mode |
@@ -685,6 +726,7 @@ Part of [lazyvim.plugins.extras.lang.typst](/extras/lang/typst)
 | <code>&lt;leader&gt;cp</code> | Toggle Typst Preview | **n** |
 
 ## [neotest](https://github.com/nvim-neotest/neotest.git)
+
 Part of [lazyvim.plugins.extras.test.core](/extras/test/core)
 
 | Key | Description | Mode |
@@ -702,6 +744,7 @@ Part of [lazyvim.plugins.extras.test.core](/extras/test/core)
 | <code>&lt;leader&gt;tw</code> | Toggle Watch (Neotest) | **n** |
 
 ## [nvim-dap](https://github.com/mfussenegger/nvim-dap.git)
+
 Part of [lazyvim.plugins.extras.test.core](/extras/test/core)
 
 | Key | Description | Mode |
@@ -709,6 +752,7 @@ Part of [lazyvim.plugins.extras.test.core](/extras/test/core)
 | <code>&lt;leader&gt;td</code> | Debug Nearest | **n** |
 
 ## [edgy.nvim](https://github.com/folke/edgy.nvim.git)
+
 Part of [lazyvim.plugins.extras.ui.edgy](/extras/ui/edgy)
 
 | Key | Description | Mode |
@@ -717,6 +761,7 @@ Part of [lazyvim.plugins.extras.ui.edgy](/extras/ui/edgy)
 | <code>&lt;leader&gt;uE</code> | Edgy Select Window | **n** |
 
 ## [chezmoi.nvim](https://github.com/xvzc/chezmoi.nvim.git)
+
 Part of [lazyvim.plugins.extras.util.chezmoi](/extras/util/chezmoi)
 
 | Key | Description | Mode |
@@ -724,6 +769,7 @@ Part of [lazyvim.plugins.extras.util.chezmoi](/extras/util/chezmoi)
 | <code>&lt;leader&gt;sz</code> | Chezmoi | **n** |
 
 ## [gh.nvim](https://github.com/ldelossa/gh.nvim.git)
+
 Part of [lazyvim.plugins.extras.util.gh](/extras/util/gh)
 
 | Key | Description | Mode |
@@ -762,6 +808,7 @@ Part of [lazyvim.plugins.extras.util.gh](/extras/util/gh)
 | <code>&lt;leader&gt;Gtt</code> | Toggle | **n** |
 
 ## [mason.nvim](https://github.com/mason-org/mason.nvim.git)
+
 Part of [lazyvim.plugins.extras.util.gitui](/extras/util/gitui)
 
 | Key | Description | Mode |
@@ -770,6 +817,7 @@ Part of [lazyvim.plugins.extras.util.gitui](/extras/util/gitui)
 | <code>&lt;leader&gt;gG</code> | GitUi (cwd) | **n** |
 
 ## [octo.nvim](https://github.com/pwntester/octo.nvim.git)
+
 Part of [lazyvim.plugins.extras.util.octo](/extras/util/octo)
 
 | Key | Description | Mode |
@@ -792,6 +840,7 @@ Part of [lazyvim.plugins.extras.util.octo](/extras/util/octo)
 | <code>&lt;localleader&gt;v</code> | +review (Octo) | **n** |
 
 ## [fzf-lua](https://github.com/ibhagwan/fzf-lua.git)
+
 Part of [lazyvim.plugins.extras.util.project](/extras/util/project)
 
 | Key | Description | Mode |
@@ -799,6 +848,7 @@ Part of [lazyvim.plugins.extras.util.project](/extras/util/project)
 | <code>&lt;leader&gt;fp</code> | Projects | **n** |
 
 ## [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim.git)
+
 Part of [lazyvim.plugins.extras.util.project](/extras/util/project)
 
 | Key | Description | Mode |
@@ -806,6 +856,7 @@ Part of [lazyvim.plugins.extras.util.project](/extras/util/project)
 | <code>&lt;leader&gt;fp</code> | Projects | **n** |
 
 ## [kulala.nvim](https://github.com/mistweaverco/kulala.nvim.git)
+
 Part of [lazyvim.plugins.extras.util.rest](/extras/util/rest)
 
 | Key | Description | Mode |
