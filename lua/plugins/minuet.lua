@@ -103,5 +103,36 @@ return {
 			{ desc = "minuet: ping the autocomplete server" }
 		)
 		health_check()
+
+		-- When a completion fails, don't spam errors if the local-autocomplete
+		-- service simply isn't running: prompt to start it once, then stay quiet
+		-- (re-checking the service at most every 30s). If the service IS up but
+		-- requests still fail, errors pass through as normal. Gate minuet's own
+		-- warn/error notifications via the injectable core in methods/.
+		local utils = require("minuet.utils")
+		local orig_notify = utils.notify
+		local function check_service(cb)
+			vim.system({ "systemctl", "is-active", "--quiet", "local-autocomplete" }, {}, function(res)
+				vim.schedule(function()
+					cb(res.code == 0)
+				end)
+			end)
+		end
+		local function prompt_start()
+			vim.notify(
+				"minuet: local-autocomplete service is not running — start it with "
+					.. "`sudo systemctl start local-autocomplete` (errors silenced until it's up)",
+				vim.log.levels.WARN
+			)
+		end
+		local gate = require("methods.minuet_error_gate").new(check_service, prompt_start)
+		utils.notify = function(msg, minuet_level, vim_level, opts2)
+			if minuet_level ~= "warn" and minuet_level ~= "error" then
+				return orig_notify(msg, minuet_level, vim_level, opts2)
+			end
+			gate(function()
+				orig_notify(msg, minuet_level, vim_level, opts2)
+			end)
+		end
 	end,
 }

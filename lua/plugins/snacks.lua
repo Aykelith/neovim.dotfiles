@@ -14,6 +14,13 @@ return {
     indent = { animate = { enabled = false } },
     scope = { treesitter = { injections = false } },
     picker = {
+      icons = {
+        git = {
+          untracked = "U",
+          ignored = "I",
+          modified = "M",
+        },
+      },
       sources = {
         explorer = {
           hidden = true,
@@ -24,6 +31,18 @@ return {
           layout = {
             preset = "default",
           },
+          format = function(item, picker)
+            local result = Snacks.picker.format.file(item, picker)
+            if item.dir and item.status then
+              for _, chunk in ipairs(result) do
+                if chunk.virt_text_pos == "right_align" and chunk.virt_text and chunk.virt_text[1] then
+                  chunk.virt_text[1][1] = "●"
+                  break
+                end
+              end
+            end
+            return result
+          end,
           win = {
             input = {
               keys = {

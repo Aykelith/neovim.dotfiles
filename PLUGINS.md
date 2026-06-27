@@ -25,6 +25,19 @@
 
 ## Observations
 
+### minuet-ai.nvim — error notifications gated on the local-autocomplete service
+
+`config()` in `lua/plugins/minuet.lua` wraps `require("minuet.utils").notify` and
+routes warn/error notifications through `lua/methods/minuet_error_gate.lua`.
+
+**Why:** when the `local-autocomplete` systemd service is stopped, every failed
+completion otherwise spams an unreachable/timeout error. The gate probes
+`systemctl is-active local-autocomplete` (async) on the first failure: if the
+service is down it prompts the user to start it once, then swallows further errors
+(re-probing at most every 30s). If the service is up but requests still fail,
+errors pass through unchanged. The gate core is dependency-injected (check/prompt/
+now) so it's unit-tested without systemd — see `tests/e2e_spec.lua` ("error gate:" tests).
+
 ### nvim-treesitter — removed (2026-06-26)
 
 Plugin removed; `lua/config/treesitter.lua` replaces it with a single `FileType` autocmd calling `vim.treesitter.start()`.

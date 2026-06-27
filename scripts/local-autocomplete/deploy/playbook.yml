@@ -1,0 +1,90 @@
+---
+# Install Ollama on the host and wire it up as a systemd service for
+# local code-completion. The service is installed DISABLED — it never starts
+# on boot. Start it yourself with `systemctl start ollama` when you want
+# autocomplete, stop it when you're done.
+#
+# Run:  ansible-playbook -i deploy/inventory.ini deploy/playbook.yml --ask-become-pass
+#
+# ponytail: systemd only. Other init systems (OpenRC/runit) added when a host
+# that needs them actually shows up.
+- name: Deploy local-autocomplete (native Ollama)
+  hosts: all
+  become: true
+  vars:
+    ollama_model: "qwen2.5-coder:3b"
+    # Local-only by default — nvim is on the same host. Set to 0.0.0.0:11434
+    # only if you really need to reach it from another machine.
+    ollama_host: "127.0.0.1:11434"
+    ollama_env:
+      OLLAMA_HOST: "{{ ollama_host }}"
+      # Keep the model resident — autocomplete is latency-sensitive, reloading
+      # per request is death.
+      OLLAMA_KEEP_ALIVE: "-1"
+      # Single-user: don't split VRAM/context into parallel slots.
+      OLLAMA_NUM_PARALLEL: "1"
+      # Flash attention + q8 KV cache = faster prefill, less memory.
+      # q8_0 KV requires flash attention, so both are set together.
+      OLLAMA_FLASH_ATTENTION: "1"
+      OLLAMA_KV_CACHE_TYPE: "q8_0"
+
+  tasks:
+    - name: Install Ollama (official script — bundles ROCm, creates ollama user)
+      ansible.builtin.shell: curl -fsSL https://ollama.com/install.sh | sh
+      args:
+        creates: /usr/local/bin/ollama
+
+    # The installer ships its own ollama.service. We run our own named unit
+    # instead, so stop + mask the default to keep it off :11434.
+    - name: Stop and mask the installer's ollama.service
+      ansible.builtin.systemd:
+        name: ollama
+        state: stopped
+        enabled: false
+        masked: true
+
+    - name: Detect AMD GPU
+      ansible.builtin.stat:
+        path: /dev/kfd
+      register: kfd
+
+    - name: Give the ollama user GPU device access (AMD)
+      ansible.builtin.user:
+        name: ollama
+        groups: render,video
+        append: true
+      when: kfd.stat.exists
+
+    - name: Install the local-autocomplete service
+      ansible.builtin.template:
+        src: templates/local-autocomplete.service.j2
+        dest: /etc/systemd/system/local-autocomplete.service
+        mode: "0644"
+      notify: reload systemd
+
+    - name: Flush handlers so the unit is live before we pull
+      ansible.builtin.meta: flush_handlers
+
+    - name: Pull the model (temporarily starts the service)
+      block:
+        - name: Start local-autocomplete
+          ansible.builtin.systemd:
+            name: local-autocomplete
+            state: restarted
+        - name: Pull model
+          ansible.builtin.command: "ollama pull {{ ollama_model }}"
+          environment:
+            OLLAMA_HOST: "{{ ollama_host }}"
+          changed_when: true
+      always:
+        - name: Stop and disable boot-start (start it manually when needed)
+          ansible.builtin.systemd:
+            name: local-autocomplete
+            state: stopped
+            enabled: false
+            daemon_reload: true
+
+  handlers:
+    - name: reload systemd
+      ansible.builtin.systemd:
+        daemon_reload: true

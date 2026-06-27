@@ -50,7 +50,7 @@ T["lazy has the requested plugins"] = function()
     ]])
     for _, want in ipairs({
       "which-key.nvim", "trouble.nvim", "snacks.nvim", "nvim-lspconfig", "mason.nvim",
-      "catppuccin", "nvim-treesitter", "lualine.nvim", "blink.cmp",
+      "catppuccin", "lualine.nvim", "blink.cmp",
       "telescope.nvim", "gitsigns.nvim", "conform.nvim", "flash.nvim",
       "minuet-ai.nvim",
     }) do
@@ -246,6 +246,11 @@ T["snacks explorer <CR> opens file in new tab"] = function()
   with_child(function(c)
     assert(h.lua(c, "return package.loaded['snacks'] ~= nil"), "snacks not loaded")
 
+    -- Pre-open a file so the original window isn't an empty unnamed buffer.
+    -- Without this, snacks suppresses new-tab creation (it avoids opening a tab
+    -- when the only non-floating window holds a blank buffer).
+    h.lua(c, "vim.cmd.edit(...)", "tests/helpers.lua")
+
     -- Write a temp file so the explorer has something to confirm on.
     local tmpfile = h.lua(c, [[
       local path = vim.fn.tempname() .. ".lua"
@@ -274,6 +279,27 @@ T["snacks explorer <CR> opens file in new tab"] = function()
     end, 5000)
     assert(ready, "snacks picker did not open")
 
+    -- Wait for items, then navigate to the first file item.
+    -- The explorer's first item is always the root directory node;
+    -- pressing <CR> on a dir only toggles expand, not open-in-tab.
+    -- We use the picker API to move past directory items to the file.
+    local on_file = h.wait(function()
+      return h.lua(c, [[
+        local ok, pickers = pcall(function() return require('snacks.picker').get() end)
+        if not ok or #pickers == 0 then return false end
+        local p = pickers[1]
+        if p:count() == 0 then return false end
+        -- move down until we land on a non-directory item
+        local item = p:current()
+        if item and item.dir then
+          p.list:move(1)
+          item = p:current()
+        end
+        return item ~= nil and not item.dir
+      ]])
+    end, 3000)
+    assert(on_file, "could not find a file item in snacks explorer")
+
     -- Confirm the selected entry; config maps <CR> -> "tab" action.
     h.input(c, "<CR>")
 
@@ -284,6 +310,92 @@ T["snacks explorer <CR> opens file in new tab"] = function()
     end, 3000)
     assert(tabs, "no new tab after <CR> in snacks explorer (tab count stayed at 1)")
   end)
+end
+
+-- The error gate is dependency-injected, so test its logic directly in the
+-- parent (no child / no systemd needed). Load the module from the config.
+local function load_gate()
+  package.path = vim.fn.getcwd() .. "/lua/?.lua;" .. package.path
+  package.loaded["methods.minuet_error_gate"] = nil
+  return require("methods.minuet_error_gate")
+end
+
+-- Service DOWN: prompt fires once, errors are swallowed (no spam).
+T["error gate: prompts once and swallows while service is down"] = function()
+  local gate_mod = load_gate()
+  local prompts, emits = 0, 0
+  local clock = 0
+  local gate = gate_mod.new(
+    function(cb) cb(false) end, -- always down
+    function() prompts = prompts + 1 end,
+    { now = function() return clock end }
+  )
+  for _ = 1, 5 do
+    gate(function() emits = emits + 1 end)
+    clock = clock + 1000 -- 1s apart, all within the 30s window
+  end
+  assert(prompts == 1, "expected 1 prompt, got " .. prompts)
+  assert(emits == 0, "expected no errors shown while down, got " .. emits)
+end
+
+-- Service UP: errors pass through every time, no prompt.
+T["error gate: shows errors when service is up"] = function()
+  local gate_mod = load_gate()
+  local prompts, emits = 0, 0
+  local clock = 0
+  local gate = gate_mod.new(
+    function(cb) cb(true) end, -- always up
+    function() prompts = prompts + 1 end,
+    { now = function() return clock end }
+  )
+  for _ = 1, 3 do
+    gate(function() emits = emits + 1 end)
+    clock = clock + 1000
+  end
+  assert(prompts == 0, "expected no prompt when up, got " .. prompts)
+  assert(emits == 3, "expected all 3 errors shown, got " .. emits)
+end
+
+-- Service is only re-probed at most once per 30s; within the window the cached
+-- state is reused (no extra probes).
+T["error gate: re-checks service at most once per 30s"] = function()
+  local gate_mod = load_gate()
+  local checks = 0
+  local clock = 0
+  local gate = gate_mod.new(
+    function(cb) checks = checks + 1; cb(false) end,
+    function() end,
+    { now = function() return clock end }
+  )
+  gate(function() end)        -- t=0: probes
+  clock = 10000
+  gate(function() end)        -- t=10s: cached, no probe
+  clock = 29000
+  gate(function() end)        -- t=29s: cached, no probe
+  assert(checks == 1, "expected 1 probe within 30s, got " .. checks)
+  clock = 31000
+  gate(function() end)        -- t=31s: window elapsed, probes again
+  assert(checks == 2, "expected re-probe after 30s, got " .. checks)
+end
+
+-- Recovery: service comes back up, then drops again -> prompt fires a 2nd time.
+T["error gate: re-arms prompt after the service recovers"] = function()
+  local gate_mod = load_gate()
+  local prompts = 0
+  local clock, up = 0, false
+  local gate = gate_mod.new(
+    function(cb) cb(up) end,
+    function() prompts = prompts + 1 end,
+    { now = function() return clock end }
+  )
+  gate(function() end)        -- down -> prompt #1
+  clock = clock + 31000
+  up = true
+  gate(function() end)        -- up -> emits, re-arms
+  clock = clock + 31000
+  up = false
+  gate(function() end)        -- down again -> prompt #2
+  assert(prompts == 2, "expected prompt to re-arm after recovery, got " .. prompts)
 end
 
 return T

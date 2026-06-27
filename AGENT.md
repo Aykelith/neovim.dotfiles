@@ -8,7 +8,8 @@ This is the configuration of Neovim/NVIM.
 - `lua/config` - configurations files (non-plugins related);
 - `lua/methods` - custom methods;
 - `lua/plugins` - directory with all the plugins; auto-loaded by Lazy;
-- `scripts` - bash scripts;
+- `scripts` - tools & scripts;
+- `scripts/local-autocomplete` - local auto-complete running with Ollama; has own AGENT.md;
 - `tests` - end-to-end tests;
 - `init.lua` - entry file.
 
@@ -18,7 +19,8 @@ This is the configuration of Neovim/NVIM.
 - each time a plugin change update `PLUGINS.md`;
 - plugins are locked at the commit or version they are set at; new versions are explicit from the user only;
 - if you need to add settings or configurations to a plugin in order to fix a problem or a bug or a problem
-with another plugin then add the change and why it was needed in the `Observations` section of `PLUGINS.md`;
+with another plugin then add the change, the date, and why it was needed in the `Observations` section of `PLUGINS.md`;
+- always read the plugin's README.md (from GitHub) to see the options or how to access the documentation for the plugin;
 
 ## Keymaps
 
@@ -50,3 +52,6 @@ Override the server repo path with `AUTOCOMPLETE_DIR=`;
 run all the tests again;
 - you should write and adjust tests for every new plugin that is added or changed;
 
+## Others
+
+- use kebab case for file names (`this-is-an-example.lua`);

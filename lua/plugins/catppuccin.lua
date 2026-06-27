@@ -9,6 +9,11 @@ return {
 	opts = {
 		flavour = "mocha",
 		auto_integrations = true,
+		custom_highlights = function(colors)
+			return {
+				SnacksPickerGitStatusUntracked = { fg = colors.green },
+			}
+		end,
 		integrations = {
 			blink_cmp = true,
 			flash = true,
