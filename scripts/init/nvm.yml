@@ -1,0 +1,75 @@
+---
+- name: Install NVM and Node 24
+  hosts: localhost
+  connection: local
+  vars:
+    nvm_dir: "{{ ansible_env.HOME }}/.nvm"
+    node_major: "24"
+
+  tasks:
+    - name: Get latest NVM release
+      ansible.builtin.uri:
+        url: "https://api.github.com/repos/nvm-sh/nvm/releases/latest"
+        return_content: true
+        headers:
+          Accept: "application/vnd.github+json"
+      register: nvm_release
+
+    - name: Set NVM version fact
+      ansible.builtin.set_fact:
+        nvm_version: "{{ nvm_release.json.tag_name }}"
+
+    - name: Check NVM installed
+      ansible.builtin.stat:
+        path: "{{ nvm_dir }}/nvm.sh"
+      register: nvm_stat
+
+    - name: Install NVM {{ nvm_version }}
+      ansible.builtin.shell: |
+        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/{{ nvm_version }}/install.sh | bash
+      args:
+        executable: /bin/bash
+      when: not nvm_stat.stat.exists
+
+    - name: Check Node {{ node_major }} installed
+      ansible.builtin.find:
+        paths: "{{ nvm_dir }}/versions/node"
+        patterns: "v{{ node_major }}.*"
+        file_type: directory
+      register: node_dirs
+      failed_when: false
+
+    - name: Install Node {{ node_major }}
+      ansible.builtin.shell: |
+        source {{ nvm_dir }}/nvm.sh && nvm install {{ node_major }}
+      args:
+        executable: /bin/bash
+      when: node_dirs.files | length == 0
+
+    - name: Get current default alias
+      ansible.builtin.shell: |
+        source {{ nvm_dir }}/nvm.sh && nvm alias default 2>/dev/null || echo "none"
+      args:
+        executable: /bin/bash
+      register: nvm_default
+      changed_when: false
+
+    - name: Set Node {{ node_major }} as default
+      ansible.builtin.shell: |
+        source {{ nvm_dir }}/nvm.sh && nvm alias default {{ node_major }}
+      args:
+        executable: /bin/bash
+      when: "'v' + node_major not in nvm_default.stdout"
+      changed_when: true
+
+    - name: Verify node and npm available
+      ansible.builtin.shell: |
+        source {{ nvm_dir }}/nvm.sh && node --version && npm --version
+      args:
+        executable: /bin/bash
+      register: node_verify
+      changed_when: false
+
+    - name: Report versions
+      ansible.builtin.debug:
+        msg: "{{ node_verify.stdout_lines }}"

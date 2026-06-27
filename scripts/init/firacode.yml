@@ -1,0 +1,109 @@
+---
+- name: Install or update FiraCode Nerd Font
+  hosts: localhost
+  connection: local
+  vars:
+    fonts_dir: "/usr/local/share/fonts"
+    firacode_prefix: "FiraCodeNerdFont"
+    firacode_releases_api: "https://api.github.com/repos/ryanoasis/nerd-fonts/releases/latest"
+    firacode_tarball: "/tmp/FiraCode.tar.xz"
+    reinstall: false  # pass -e reinstall=true to force
+
+  tasks:
+    - name: Abort on non-Debian systems
+      ansible.builtin.fail:
+        msg: "This playbook only supports Debian-based distros."
+      when: ansible_os_family != "Debian"
+
+    - name: Ensure fontconfig is available
+      ansible.builtin.package:
+        name: fontconfig
+        state: present
+      become: true
+
+    - name: Check if FiraCode fonts are installed
+      ansible.builtin.command: fc-list
+      register: fc_list_out
+      changed_when: false
+
+    - name: Set firacode_exists fact
+      ansible.builtin.set_fact:
+        firacode_exists: "{{ firacode_prefix in fc_list_out.stdout }}"
+
+    - name: Report FiraCode already present
+      ansible.builtin.debug:
+        msg: "FiraCode Nerd Font already installed. Pass -e reinstall=true to reinstall."
+      when: firacode_exists and not reinstall
+
+    - name: Remove existing FiraCode files (reinstall)
+      become: true
+      ansible.builtin.find:
+        paths: "{{ fonts_dir }}"
+        patterns: "{{ firacode_prefix }}*"
+      register: firacode_files
+      when: firacode_exists and reinstall | bool
+
+    - name: Delete found FiraCode files
+      become: true
+      ansible.builtin.file:
+        path: "{{ item.path }}"
+        state: absent
+      loop: "{{ firacode_files.files }}"
+      when: firacode_exists and reinstall | bool
+
+    - name: Get latest nerd-fonts release info
+      ansible.builtin.uri:
+        url: "{{ firacode_releases_api }}"
+        return_content: true
+        headers:
+          Accept: "application/vnd.github+json"
+      register: nf_release
+      when: not firacode_exists or reinstall | bool
+
+    - name: Set download URL
+      ansible.builtin.set_fact:
+        firacode_url: "https://github.com/ryanoasis/nerd-fonts/releases/download/{{ nf_release.json.tag_name }}/FiraCode.tar.xz"
+      when: not firacode_exists or reinstall | bool
+
+    - name: Download FiraCode tarball
+      ansible.builtin.get_url:
+        url: "{{ firacode_url }}"
+        dest: "{{ firacode_tarball }}"
+        force: true
+        mode: "0644"
+      when: not firacode_exists or reinstall | bool
+
+    - name: Ensure fonts dir exists
+      become: true
+      ansible.builtin.file:
+        path: "{{ fonts_dir }}"
+        state: directory
+        mode: "0755"
+      when: not firacode_exists or reinstall | bool
+
+    - name: Untar FiraCode fonts
+      become: true
+      ansible.builtin.unarchive:
+        src: "{{ firacode_tarball }}"
+        dest: "{{ fonts_dir }}"
+        remote_src: true
+      when: not firacode_exists or reinstall | bool
+
+    - name: Refresh font cache
+      become: true
+      ansible.builtin.command: fc-cache -fv
+      changed_when: true
+      when: not firacode_exists or reinstall | bool
+
+    - name: Verify FiraCode installed
+      ansible.builtin.command: fc-list
+      register: fc_list_after
+      changed_when: false
+      when: not firacode_exists or reinstall | bool
+
+    - name: Assert FiraCode now present
+      ansible.builtin.assert:
+        that: firacode_prefix in fc_list_after.stdout
+        fail_msg: "FiraCode fonts were not found after installation. Check {{ fonts_dir }}."
+        success_msg: "FiraCode Nerd Font installed successfully."
+      when: not firacode_exists or reinstall | bool

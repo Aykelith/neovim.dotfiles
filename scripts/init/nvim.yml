@@ -1,0 +1,132 @@
+---
+- name: Install or update Neovim
+  hosts: localhost
+  connection: local
+  vars:
+    nvim_install_dir: "{{ ansible_env.HOME }}/local-apps/nvim"
+    nvim_bin: "{{ ansible_env.HOME }}/local-apps/nvim/bin/nvim"
+    nvim_releases_api: "https://api.github.com/repos/neovim/neovim/releases/latest"
+    nvim_tarball: "/tmp/nvim-linux-x86_64.tar.gz"
+
+  tasks:
+    - name: Check PATH contains ~/local-apps/nvim/bin
+      ansible.builtin.shell: |
+        echo "$PATH" | tr ':' '\n' | grep -qxF "{{ nvim_install_dir }}/bin"
+      register: path_check
+      changed_when: false
+      failed_when: false
+
+    - name: Abort if ~/local-apps/nvim/bin not in PATH
+      ansible.builtin.fail:
+        msg: >
+          ~/local-apps/nvim/bin is not in your PATH.
+          Please read INSTALL.md for setup instructions.
+      when: path_check.rc != 0
+
+    - name: Resolve which nvim
+      ansible.builtin.command: which nvim
+      register: which_nvim
+      changed_when: false
+      failed_when: false
+
+    - name: Abort if nvim not found on PATH
+      ansible.builtin.fail:
+        msg: >
+          'nvim' not found on PATH.
+          Please read INSTALL.md for setup instructions.
+      when: which_nvim.rc != 0
+
+    - name: Abort if nvim points to wrong path
+      ansible.builtin.fail:
+        msg: >
+          'which nvim' returns '{{ which_nvim.stdout }}' but expected '{{ nvim_bin }}'.
+          Please read INSTALL.md for setup instructions.
+      when: which_nvim.stdout != nvim_bin
+
+    - name: Get latest Neovim release info
+      ansible.builtin.uri:
+        url: "{{ nvim_releases_api }}"
+        return_content: true
+        headers:
+          Accept: "application/vnd.github+json"
+      register: nvim_release
+
+    - name: Set latest version fact
+      ansible.builtin.set_fact:
+        nvim_latest: "{{ nvim_release.json.tag_name }}"
+
+    - name: Get installed nvim version
+      ansible.builtin.command: "{{ nvim_bin }} --version"
+      register: nvim_version_out
+      changed_when: false
+      failed_when: false
+
+    - name: Parse installed version
+      ansible.builtin.set_fact:
+        nvim_installed: >-
+          v{{ nvim_version_out.stdout | regex_search('NVIM v([0-9]+\.[0-9]+\.[0-9]+)', '\1') | first }}
+      when: nvim_version_out.rc == 0 and nvim_version_out.stdout != ''
+
+    - name: Set installed version to none when nvim missing
+      ansible.builtin.set_fact:
+        nvim_installed: "none"
+      when: nvim_version_out.rc != 0 or nvim_version_out.stdout == ''
+
+    - name: Report already up to date
+      ansible.builtin.debug:
+        msg: "Neovim {{ nvim_installed }} is already the latest version. Nothing to do."
+      when: nvim_installed == nvim_latest
+
+    - name: Set download URL fact
+      ansible.builtin.set_fact:
+        nvim_download_url: "https://github.com/neovim/neovim/releases/download/{{ nvim_latest }}/nvim-linux-x86_64.tar.gz"
+      when: nvim_installed != nvim_latest
+
+    - name: Download Neovim tarball
+      ansible.builtin.get_url:
+        url: "{{ nvim_download_url }}"
+        dest: "{{ nvim_tarball }}"
+        force: true
+        mode: "0644"
+      when: nvim_installed != nvim_latest
+
+    - name: Remove old Neovim install dir
+      ansible.builtin.file:
+        path: "{{ nvim_install_dir }}"
+        state: absent
+      when: nvim_installed != nvim_latest
+
+    - name: Recreate install dir
+      ansible.builtin.file:
+        path: "{{ nvim_install_dir }}"
+        state: directory
+        mode: "0755"
+      when: nvim_installed != nvim_latest
+
+    - name: Untar Neovim
+      ansible.builtin.unarchive:
+        src: "{{ nvim_tarball }}"
+        dest: "{{ nvim_install_dir }}"
+        extra_opts: ["--strip-components=1"]
+        remote_src: true
+      when: nvim_installed != nvim_latest
+
+    - name: Verify installed version matches latest
+      ansible.builtin.command: "{{ nvim_bin }} --version"
+      register: nvim_version_after
+      changed_when: false
+
+    - name: Parse post-install version
+      ansible.builtin.set_fact:
+        nvim_installed_after: >-
+          v{{ nvim_version_after.stdout | regex_search('NVIM v([0-9]+\.[0-9]+\.[0-9]+)', '\1') | first }}
+      when: nvim_installed != nvim_latest
+
+    - name: Confirm version match
+      ansible.builtin.assert:
+        that: nvim_installed_after == nvim_latest
+        fail_msg: >
+          Installed {{ nvim_installed_after }} but expected {{ nvim_latest }}.
+          Something went wrong with the download.
+        success_msg: "Neovim {{ nvim_installed_after }} installed successfully."
+      when: nvim_installed != nvim_latest

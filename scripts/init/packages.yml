@@ -1,0 +1,16 @@
+---
+- name: Install required base packages
+  hosts: localhost
+  connection: local
+  tasks:
+    - name: Ensure base packages are present
+      become: true
+      ansible.builtin.package:
+        name:
+          - git
+          - curl
+          - wget
+          - tar
+          - unzip
+          - build-essential
+        state: present
