@@ -312,6 +312,44 @@ T["snacks explorer <CR> opens file in new tab"] = function()
   end)
 end
 
+-- markdown-prettier-warn: unit-tested directly in the parent process (no child needed).
+local function load_md_warn()
+  package.path = vim.fn.getcwd() .. "/lua/?.lua;" .. package.path
+  package.loaded["methods.markdown-prettier-warn"] = nil
+  return require("methods.markdown-prettier-warn")
+end
+
+T["markdown prettier warn: fires once when prettier absent"] = function()
+  local m = load_md_warn()
+  local count = 0
+  local absent = function(_) return false end
+  local notify = function(_, _) count = count + 1 end
+  m.check(0, absent, notify)
+  m.check(0, absent, notify)
+  m.check(0, absent, notify)
+  assert(count == 1, "expected 1 warning, got " .. count)
+end
+
+T["markdown prettier warn: silent when prettier present"] = function()
+  local m = load_md_warn()
+  local count = 0
+  local present = function(_) return true end
+  local notify = function(_, _) count = count + 1 end
+  m.check(0, present, notify)
+  m.check(0, present, notify)
+  assert(count == 0, "expected 0 warnings, got " .. count)
+end
+
+T["markdown prettier warn: stays silent after first-warn suppression"] = function()
+  local m = load_md_warn()
+  local count = 0
+  local notify = function(_, _) count = count + 1 end
+  m.check(0, function(_) return false end, notify) -- fires
+  m.check(0, function(_) return false end, notify) -- suppressed
+  m.check(0, function(_) return true end,  notify) -- suppressed (already warned)
+  assert(count == 1, "expected 1 warning, got " .. count)
+end
+
 -- The error gate is dependency-injected, so test its logic directly in the
 -- parent (no child / no systemd needed). Load the module from the config.
 local function load_gate()

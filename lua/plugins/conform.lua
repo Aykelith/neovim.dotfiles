@@ -15,9 +15,20 @@ return {
       javascript = { "prettier" },
       typescript = { "prettier" },
       typescriptreact = { "prettier" },
+      markdown = { "prettier" },
+      mdx = { "prettier" },
     },
-    -- ponytail: format on save with LSP fallback; flip to a keymap-only flow
-    -- if save latency ever bites.
-    format_on_save = { timeout_ms = 500, lsp_format = "fallback" },
+    formatters = {
+      -- ponytail: prose-wrap is markdown-only so safe to set globally
+      prettier = { prepend_args = { "--prose-wrap", "always", "--print-width", "80" } },
+    },
+    format_on_save = function(bufnr)
+      local ft = vim.bo[bufnr].filetype
+      if ft == "markdown" or ft == "mdx" then
+        require("methods.markdown-prettier-warn").check(bufnr)
+      end
+      -- ponytail: LSP fallback; flip to keymap-only if save latency bites
+      return { timeout_ms = 500, lsp_format = "fallback" }
+    end,
   },
 }

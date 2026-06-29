@@ -38,6 +38,18 @@ service is down it prompts the user to start it once, then swallows further erro
 errors pass through unchanged. The gate core is dependency-injected (check/prompt/
 now) so it's unit-tested without systemd — see `tests/e2e_spec.lua` ("error gate:" tests).
 
+### conform.nvim — markdown/mdx prettier warn-once (2026-06-28)
+
+`format_on_save` is a function; for markdown/mdx it calls
+`lua/methods/markdown-prettier-warn.lua` before returning format options.
+
+**Why:** prettier must come from each project's `node_modules` (not global
+PATH). If it's absent, conform silently skips formatting with no feedback.
+The warn module fires `vim.notify(WARN)` once per session when
+`get_formatter_info("prettier", bufnr).available` is false, then stays
+silent. Dependency-injected (check_fn, notify_fn) so unit-tested in
+`tests/e2e_spec.lua` ("markdown prettier warn:" tests).
+
 ### nvim-treesitter — removed (2026-06-26)
 
 Plugin removed; `lua/config/treesitter.lua` replaces it with a single `FileType` autocmd calling `vim.treesitter.start()`.
