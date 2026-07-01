@@ -22,6 +22,7 @@ require("config.options")
 require("config.treesitter")
 require("methods.win-move")
 require("config.keymaps")
+require("config.commands")
 
 vim.filetype.add({
   extension = {

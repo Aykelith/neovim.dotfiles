@@ -1,7 +1,7 @@
 local options = {
 	backup = false, -- disable creating a backup file
 	cmdheight = 1, -- more space in the neovim command line for displaying messages
-	mouse = "", -- no allow the mouse to be used in neovim
+	mouse = "a", -- allow the mouse to be used in all modes
 	smartcase = false, -- smart case
 	smartindent = true, -- make indenting smarter again
 	splitbelow = true, -- force all horizontal splits to go below current window
@@ -30,4 +30,26 @@ local options = {
 
 for k, v in pairs(options) do
 	vim.opt[k] = v
+end
+
+-- Over SSH there's no X11/Wayland display on the remote host, so xclip/wl-copy
+-- can never reach the local machine's clipboard. Use OSC 52 instead: it writes
+-- through the terminal escape sequence itself, no display connection needed.
+--
+-- Deliberately NOT setting clipboard=unnamedplus here: that aliases the
+-- unnamed register "" to "+", so every plain yank/delete/paste (and any
+-- plugin/autocmd that reads the unnamed register) would transparently read
+-- through "+", triggering OSC 52's paste() -- which blocks up to 10s waiting
+-- for a terminal response (see vim/ui/clipboard/osc52.lua). Keep plain
+-- yy/dd/p purely internal; use "+y / "+p explicitly to hit the system
+-- clipboard (copy is fire-and-forget, only paste blocks).
+if vim.env.SSH_TTY or vim.env.SSH_CONNECTION then
+	local osc52 = require("vim.ui.clipboard.osc52")
+	vim.g.clipboard = {
+		name = "OSC 52",
+		copy = { ["+"] = osc52.copy("+"), ["*"] = osc52.copy("*") },
+		paste = { ["+"] = osc52.paste("+"), ["*"] = osc52.paste("*") },
+	}
+else
+	vim.opt.clipboard = "unnamedplus"
 end

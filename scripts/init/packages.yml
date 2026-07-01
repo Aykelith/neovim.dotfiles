@@ -13,4 +13,5 @@
           - tar
           - unzip
           - build-essential
+          - xclip
         state: present

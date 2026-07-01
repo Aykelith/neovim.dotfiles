@@ -27,6 +27,92 @@ T["loads user config (options & leader)"] = function()
   end)
 end
 
+local function on_ssh()
+  return (vim.env.SSH_TTY or vim.env.SSH_CONNECTION) ~= nil
+end
+
+-- Outside SSH, clipboard=unnamedplus makes every yank/delete/paste use the
+-- system clipboard (xclip/wl-copy) automatically -- fine there since Get()
+-- is a fast, non-interactive subprocess call.
+T["clipboard option is set to unnamedplus (non-SSH)"] = function()
+  if on_ssh() then return end
+  with_child(function(c)
+    assert(h.lua(c, "return vim.o.clipboard") == "unnamedplus", "clipboard option not unnamedplus")
+  end)
+end
+
+-- Over SSH, clipboard must stay unset (NOT unnamedplus): aliasing "" to "+
+-- would make every plain yank/delete/paste transparently read through "+,
+-- which under OSC 52 blocks up to 10s waiting for a terminal response (see
+-- vim/ui/clipboard/osc52.lua). Plain yy/dd/p must stay purely internal.
+T["clipboard is left unaliased over SSH (plain yanks stay internal)"] = function()
+  if not on_ssh() then return end
+  with_child(function(c)
+    local clip = h.lua(c, "return vim.o.clipboard")
+    assert(clip == "", "clipboard should be empty under SSH, got: " .. vim.inspect(clip))
+  end)
+end
+
+-- Over SSH there's no display on the remote host, so options.lua switches to
+-- OSC 52 (writes through the terminal escape sequence, no xclip/wl-copy needed).
+T["uses OSC 52 clipboard provider over SSH"] = function()
+  if not on_ssh() then return end
+  with_child(function(c)
+    local name = h.lua(c, "return vim.g.clipboard and vim.g.clipboard.name")
+    assert(name == "OSC 52", "expected OSC 52 provider under SSH, got: " .. vim.inspect(name))
+  end)
+end
+
+-- Explicit "+yy must complete without blocking: copy() only fires the OSC 52
+-- escape sequence, it doesn't wait for a response (only paste() does). If
+-- this hangs, the child never replies and h.lua below times out the test.
+T['explicit "+y does not block under SSH (copy is fire-and-forget)'] = function()
+  if not on_ssh() then return end
+  with_child(function(c)
+    h.input(c, 'ihello osc52<Esc>0"+yy')
+    local line = h.lua(c, "return vim.api.nvim_get_current_line()")
+    assert(line == "hello osc52", "unexpected buffer state after \"+yy: " .. vim.inspect(line))
+  end)
+end
+
+-- Outside SSH, with clipboard=unnamedplus, ordinary yanks must mirror into
+-- the "+" register (works even without a functional OS clipboard/DISPLAY,
+-- since nvim keeps "+ as a real addressable register regardless of provider
+-- push). Skipped over SSH: OSC 52's paste() blocks up to 10s waiting for a
+-- terminal response that a headless test runner will never send (see
+-- vim/ui/clipboard/osc52.lua) -- getreg('+') would hang the whole suite.
+T["yanking mirrors text into the + register (non-SSH)"] = function()
+  if on_ssh() then return end
+  with_child(function(c)
+    h.input(c, "ihello clipboard<Esc>0yy")
+    local plus = h.wait(function()
+      local v = h.lua(c, "return vim.fn.getreg('+')")
+      return v == "hello clipboard\n" and v or nil
+    end, 2000)
+    assert(plus, "+ register not synced from yank")
+  end)
+end
+
+-- Real OS clipboard round-trip: requires an active X11/Wayland session and a
+-- working clipboard tool (xclip/wl-copy), and NOT SSH (options.lua prefers
+-- OSC 52 there, so this would be testing the wrong provider). Skipped
+-- headless/CI where there's no DISPLAY, since the tool may exist on PATH but
+-- can't reach a server.
+T["yanked text reaches the real OS clipboard (requires DISPLAY, non-SSH)"] = function()
+  if on_ssh() then return end
+  if vim.env.DISPLAY == nil and vim.env.WAYLAND_DISPLAY == nil then return end
+  with_child(function(c)
+    local marker = "e2e-clipboard-check-" .. tostring(math.random(100000))
+    h.input(c, "i" .. marker .. "<Esc>0yy")
+    h.wait(function()
+      return h.lua(c, "return vim.fn.getreg('+')") == marker .. "\n"
+    end, 2000)
+    local read_cmd = vim.env.WAYLAND_DISPLAY and "wl-paste" or "xclip -selection clipboard -o"
+    local got = vim.fn.system(read_cmd)
+    assert(got:match(marker), "OS clipboard missing yanked text: " .. vim.inspect(got))
+  end)
+end
+
 -- Window-nav keymap from keymaps.lua exists.
 T["registers <C-h> window-nav keymap"] = function()
   with_child(function(c)
