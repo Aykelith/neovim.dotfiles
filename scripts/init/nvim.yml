@@ -29,19 +29,12 @@
       changed_when: false
       failed_when: false
 
-    - name: Abort if nvim not found on PATH
-      ansible.builtin.fail:
-        msg: >
-          'nvim' not found on PATH.
-          Please read INSTALL.md for setup instructions.
-      when: which_nvim.rc != 0
-
     - name: Abort if nvim points to wrong path
       ansible.builtin.fail:
         msg: >
           'which nvim' returns '{{ which_nvim.stdout }}' but expected '{{ nvim_bin }}'.
           Please read INSTALL.md for setup instructions.
-      when: which_nvim.stdout != nvim_bin
+      when: which_nvim.rc == 0 and which_nvim.stdout != nvim_bin
 
     - name: Get latest Neovim release info
       ansible.builtin.uri:
@@ -60,17 +53,18 @@
       register: nvim_version_out
       changed_when: false
       failed_when: false
+      when: which_nvim.rc == 0
 
     - name: Parse installed version
       ansible.builtin.set_fact:
         nvim_installed: >-
           v{{ nvim_version_out.stdout | regex_search('NVIM v([0-9]+\.[0-9]+\.[0-9]+)', '\1') | first }}
-      when: nvim_version_out.rc == 0 and nvim_version_out.stdout != ''
+      when: which_nvim.rc == 0 and nvim_version_out.rc == 0 and nvim_version_out.stdout != ''
 
     - name: Set installed version to none when nvim missing
       ansible.builtin.set_fact:
         nvim_installed: "none"
-      when: nvim_version_out.rc != 0 or nvim_version_out.stdout == ''
+      when: which_nvim.rc != 0 or nvim_version_out.rc != 0 or nvim_version_out.stdout == ''
 
     - name: Report already up to date
       ansible.builtin.debug:
