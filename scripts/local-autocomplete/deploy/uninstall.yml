@@ -1,0 +1,85 @@
+---
+# Fully remove local-autocomplete: stops and deletes both systemd units
+# (local-autocomplete + the installer's ollama.service), uninstalls the Ollama
+# binary, and removes the `ollama` system user — which deletes its home dir
+# (~/.ollama), i.e. every pulled model, not just qwen2.5-coder.
+#
+# DESTRUCTIVE. Refuses to run unless you pass -e confirm=yes.
+#
+# Run:  ansible-playbook -i deploy/inventory.ini deploy/uninstall.yml \
+#         --ask-become-pass -e confirm=yes
+
+- name: Uninstall local-autocomplete (native Ollama)
+  hosts: all
+  become: true
+  vars:
+    confirm: false
+
+  tasks:
+    - name: Refuse to run without explicit confirmation
+      ansible.builtin.assert:
+        that: confirm | bool
+        fail_msg: >-
+          This deletes the ollama user, the ollama binary, and every pulled
+          model. Re-run with -e confirm=yes to proceed.
+        quiet: true
+
+    - name: Stop and disable local-autocomplete
+      ansible.builtin.systemd:
+        name: local-autocomplete
+        state: stopped
+        enabled: false
+      ignore_errors: true
+
+    - name: Remove local-autocomplete unit file
+      ansible.builtin.file:
+        path: /etc/systemd/system/local-autocomplete.service
+        state: absent
+      notify: reload systemd
+
+    - name: Unmask the installer's ollama.service so it can be stopped/removed cleanly
+      ansible.builtin.systemd:
+        name: ollama
+        masked: false
+      ignore_errors: true
+
+    - name: Stop and disable ollama.service
+      ansible.builtin.systemd:
+        name: ollama
+        state: stopped
+        enabled: false
+      ignore_errors: true
+
+    - name: Remove ollama.service unit file (installer-provided)
+      ansible.builtin.file:
+        path: /etc/systemd/system/ollama.service
+        state: absent
+      notify: reload systemd
+
+    - name: Flush handlers before touching the binary/user
+      ansible.builtin.meta: flush_handlers
+
+    - name: Remove the ollama binary
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /usr/local/bin/ollama
+        - /usr/bin/ollama
+
+    - name: Remove the ollama user and its home dir (all pulled models live there)
+      ansible.builtin.user:
+        name: ollama
+        state: absent
+        remove: true
+
+    - name: Remove the ollama group if it still exists
+      ansible.builtin.group:
+        name: ollama
+        state: absent
+      ignore_errors: true
+
+  handlers:
+    - name: reload systemd
+      ansible.builtin.systemd:
+        daemon_reload: true

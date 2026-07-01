@@ -33,6 +33,17 @@ Override model: `-e ollama_model=qwen2.5-coder:1.5b`. Default is `qwen2.5-coder:
 The playbook stops + masks the installer's default `ollama.service` and runs its
 own named unit `local-autocomplete` instead, to keep the default off `:11434`.
 
+## Uninstall
+
+```sh
+ansible-playbook -i deploy/inventory.ini deploy/uninstall.yml --ask-become-pass -e confirm=yes
+```
+
+`deploy/uninstall.yml` — removes both systemd units, the ollama binary, and the
+`ollama` system user (`remove: true` deletes its home dir, i.e. every pulled
+model). Refuses to run without `confirm=yes` (asserted at the top). Not gated
+behind `$MINUET_E2E` or any test — it's destructive by design, run manually.
+
 ## Service control
 
 Service never auto-starts. Manage manually:
@@ -68,3 +79,6 @@ E2E test (parent repo): `./tests/run-autocomplete.sh`, gated behind `$MINUET_E2E
 
 - Change deploy behavior → keep `README.md` "Files"/"Install"/"Run" sections in sync.
 - New tuning env var → add to `ollama_env` with a comment explaining why.
+- `deploy/playbook.yml` and `deploy/uninstall.yml` must be kept in sync: anything
+  the install playbook creates (units, users, groups, files) the uninstall
+  playbook must know how to remove, and vice versa.

@@ -69,6 +69,17 @@ journalctl -u local-autocomplete -f        # watch logs
 curl http://127.0.0.1:11434/api/tags       # check it's alive
 ```
 
+## Uninstall
+
+```sh
+ansible-playbook -i deploy/inventory.ini deploy/uninstall.yml --ask-become-pass \
+  -e confirm=yes
+```
+
+This removes both systemd units, the Ollama binary, and the `ollama` system
+user — which deletes its home dir (`~/.ollama`) and every pulled model, not
+just `qwen2.5-coder`. It refuses to run without `-e confirm=yes`.
+
 ### AMD GPU notes
 
 The playbook adds the `ollama` user to the `render` and `video` groups so it can
@@ -109,5 +120,6 @@ MINUET_MODEL=qwen2.5-coder:3b nvim
 | File                                  | Purpose                                           |
 |---------------------------------------|---------------------------------------------------|
 | `deploy/playbook.yml`                 | Ansible: install Ollama + systemd service (disabled) |
+| `deploy/uninstall.yml`                | Ansible: full teardown — units, binary, user, and all pulled models |
 | `deploy/inventory.ini`                | Target hosts (defaults to localhost)              |
 | `deploy/templates/local-autocomplete.service.j2` | systemd unit with the tuned env config |
