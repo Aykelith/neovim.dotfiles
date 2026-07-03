@@ -22,6 +22,7 @@
 | flash.nvim | [folke/flash.nvim](https://github.com/folke/flash.nvim) | `lua/plugins/flash.lua` | lazy-lock.json | Jump motions (lazy: keys) |
 | minuet-ai.nvim | [milanglacier/minuet-ai.nvim](https://github.com/milanglacier/minuet-ai.nvim) | `lua/plugins/minuet.lua` | v0.9.0 | Local LLM autocomplete (ghost text) via self-hosted Ollama / Qwen2.5-Coder (lazy: InsertEnter) |
 | bufferline.nvim | [akinsho/bufferline.nvim](https://github.com/akinsho/bufferline.nvim) | `lua/plugins/bufferline.lua` | lazy-lock.json | VSCode-style bufferline showing all open buffers as tabs (lazy: VeryLazy) |
+| grug-far.nvim | [MagicDuck/grug-far.nvim](https://github.com/MagicDuck/grug-far.nvim) | `lua/plugins/grug-far.lua` | lazy-lock.json | Multi-file search & replace with diff preview, ripgrep-backed (lazy: cmd/keys) |
 
 ## Observations
 
@@ -37,6 +38,47 @@ service is down it prompts the user to start it once, then swallows further erro
 (re-probing at most every 30s). If the service is up but requests still fail,
 errors pass through unchanged. The gate core is dependency-injected (check/prompt/
 now) so it's unit-tested without systemd — see `tests/e2e_spec.lua` ("error gate:" tests).
+
+### nvim-lspconfig — `LspInfo`/`LspStart`/`LspRestart`/`LspStop` do not exist on this Nvim (2026-07-03)
+
+No config change; documenting expected behavior so it isn't "fixed" again by
+mistake.
+
+**Why:** Nvim 0.11+ ships a native `:lsp` command (`:lsp enable|disable|restart|stop`,
+see `:help :lsp`). `nvim-lspconfig`'s `plugin/lspconfig.lua` detects this
+(`vim.fn.exists(':lsp') == 2`) and returns before defining any of its legacy
+`LspInfo`/`LspLog`/`LspStart`/`LspRestart`/`LspStop` commands, deferring to the
+native one entirely. A prior attempt to force these into existence by adding
+them as `cmd` lazy-load triggers in `lua/plugins/lsp.lua` didn't work: lazy.nvim's
+`cmd` stub is deleted the first time the command is invoked (or immediately
+once the plugin loads via the `event` trigger), and since the real definition
+is always skipped by the guard above, the command ends up not existing at all
+afterward — worse than before, since the pending stub had briefly made
+`exists(':LspRestart')` return true. Use the native commands instead:
+`:lsp restart [client]`, `:lsp stop [client]`, `:lsp enable|disable
+[config_name]`, `:checkhealth vim.lsp` for status, and
+`:lua vim.cmd('tabnew '..vim.lsp.log.get_filename())` for the log.
+
+### telescope.nvim — live_grep forced case-insensitive (2026-07-03)
+
+`opts.pickers.live_grep.additional_args` adds `--ignore-case` to the ripgrep
+invocation in `lua/plugins/telescope.lua`.
+
+**Why:** telescope's default `vimgrep_arguments` use `--smart-case`, which
+switches to case-sensitive matching as soon as the query contains an
+uppercase letter. The user wants Live Grep to always ignore case regardless
+of query casing.
+
+### telescope.nvim — search dot-directories, keep .gitignore/.ignore respected (2026-07-03)
+
+`pickers.live_grep.additional_args` also adds `--hidden`, and
+`pickers.find_files.hidden = true` is set, in `lua/plugins/telescope.lua`.
+
+**Why:** by default ripgrep/fd skip dot-files and dot-directories. `--hidden`
+makes them searchable/findable. This does not disable `.gitignore`/`.ignore`
+respect (that's ripgrep's separate default, unaffected by `--hidden`) — a
+project-root `.ignore` file (ripgrep-native, same syntax as `.gitignore`) is
+the supported way to add extra excludes beyond git's own.
 
 ### conform.nvim — markdown/mdx prettier warn-once (2026-06-28)
 

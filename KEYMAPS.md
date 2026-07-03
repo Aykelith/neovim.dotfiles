@@ -29,6 +29,8 @@
 | **\<leader>fb** | n | `lua/plugins/telescope.lua` | Telescope: buffers |
 | **\<leader>fh** | n | `lua/plugins/telescope.lua` | Telescope: help tags |
 | **\<leader>fr** | n | `lua/plugins/telescope.lua` | Telescope: recent files |
+| **\<C-j>** | i | `lua/plugins/telescope.lua` | Telescope prompt: cycle to next search history entry |
+| **\<C-k>** | i | `lua/plugins/telescope.lua` | Telescope prompt: cycle to previous search history entry |
 | **\<leader>cf** | n | `lua/plugins/conform.lua` | Format buffer (conform) |
 | **]c** | n | `lua/plugins/gitsigns.lua` | Git: next hunk (buffer-local) |
 | **[c** | n | `lua/plugins/gitsigns.lua` | Git: prev hunk (buffer-local) |
@@ -48,3 +50,5 @@
 | **\\[** | n | `lua/plugins/bufferline.lua` | Previous buffer |
 | **\\]** | n | `lua/plugins/bufferline.lua` | Next buffer |
 | **\<leader>q** | n | `lua/config/keymaps.lua` | Close buffer |
+| **\<leader>sr** | n | `lua/plugins/grug-far.lua` | grug-far: search & replace across files |
+| **\<leader>sr** | v | `lua/plugins/grug-far.lua` | grug-far: search & replace within visual selection |

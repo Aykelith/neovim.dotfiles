@@ -15,10 +15,27 @@ return {
     { "<leader>fr", "<cmd>Telescope oldfiles<cr>", desc = "Recent Files" },
   },
   opts = {
+    pickers = {
+      live_grep = {
+        additional_args = { "--ignore-case", "--hidden" },
+      },
+      find_files = {
+        hidden = true,
+      },
+    },
     extensions = { fzf = {} },
   },
   config = function(_, opts)
     local telescope = require("telescope")
+    local actions = require("telescope.actions")
+    opts.defaults = vim.tbl_deep_extend("force", opts.defaults or {}, {
+      mappings = {
+        i = {
+          ["<C-j>"] = actions.cycle_history_next,
+          ["<C-k>"] = actions.cycle_history_prev,
+        },
+      },
+    })
     telescope.setup(opts)
     pcall(telescope.load_extension, "fzf")
   end,
