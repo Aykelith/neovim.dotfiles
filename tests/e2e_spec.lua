@@ -522,4 +522,49 @@ T["error gate: re-arms prompt after the service recovers"] = function()
   assert(prompts == 2, "expected prompt to re-arm after recovery, got " .. prompts)
 end
 
+-- mermaid-live: pure parsing + URL encoding, tested directly in parent.
+local function load_mermaid()
+  package.path = vim.fn.getcwd() .. "/lua/?.lua;" .. package.path
+  package.loaded["methods.mermaid-live"] = nil
+  return require("methods.mermaid-live")
+end
+
+T["mermaid-live: extracts the block the cursor sits in"] = function()
+  local m = load_mermaid()
+  local lines = { "# doc", "```mermaid", "flowchart TD", "  A --> B", "```", "after" }
+  assert(m.block_at(lines, 3) == "flowchart TD\n  A --> B", "body extraction")
+  assert(m.block_at(lines, 2) == "flowchart TD\n  A --> B", "fence line counts as inside")
+  assert(m.block_at(lines, 1) == nil, "outside block -> nil")
+  assert(m.block_at(lines, 6) == nil, "after block -> nil")
+end
+
+T["mermaid-live: ignores non-mermaid fences"] = function()
+  local m = load_mermaid()
+  local lines = { "```lua", "print(1)", "```" }
+  assert(m.block_at(lines, 2) == nil, "lua fence must not match")
+end
+
+T["mermaid-live: URL round-trips the code via base64 state"] = function()
+  local m = load_mermaid()
+  local url = m.encode_url("flowchart TD\n  A --> B")
+  local b64 = url:match("#base64:(.+)$")
+  assert(b64, "url has base64 fragment: " .. url)
+  local state = vim.json.decode(vim.base64.decode(b64))
+  assert(state.code == "flowchart TD\n  A --> B", "decoded code mismatch")
+end
+
+T["mermaid-live: places one hint extmark per mermaid fence"] = function()
+  local m = load_mermaid()
+  local buf = vim.api.nvim_create_buf(false, true)
+  vim.api.nvim_buf_set_lines(buf, 0, -1, false, {
+    "```mermaid", "flowchart TD", "```",
+    "```lua", "print(1)", "```",
+    "```mermaid", "graph LR", "```",
+  })
+  m.refresh_hints(buf)
+  local ns = vim.api.nvim_get_namespaces()["mermaid-live-hint"]
+  local marks = vim.api.nvim_buf_get_extmarks(buf, ns, 0, -1, {})
+  assert(#marks == 2, "expected 2 hints (mermaid fences only), got " .. #marks)
+end
+
 return T

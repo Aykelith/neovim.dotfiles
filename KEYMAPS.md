@@ -37,6 +37,7 @@
 | **\<leader>gp** | n | `lua/plugins/gitsigns.lua` | Git: preview hunk |
 | **\<leader>gb** | n | `lua/plugins/gitsigns.lua` | Git: blame line |
 | **\<leader>gr** | n | `lua/plugins/gitsigns.lua` | Git: reset hunk |
+| **\<leader>m** | n | `ftplugin/markdown.lua` | Open mermaid block under cursor in Mermaid Live Editor (markdown-local) |
 | **s** | n,x,o | `lua/plugins/flash.lua` | Flash jump |
 | **S** | n,x,o | `lua/plugins/flash.lua` | Flash treesitter |
 | **r** | o | `lua/plugins/flash.lua` | Remote flash (operator) |
