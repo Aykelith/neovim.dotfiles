@@ -10,7 +10,7 @@ return {
   config = function()
     -- Mason downloads these; rust_analyzer is taken from PATH (rustup/cargo).
     require("mason-lspconfig").setup({
-      ensure_installed = { "lua_ls", "gopls", "ts_ls" },
+      ensure_installed = { "lua_ls", "gopls", "ts_ls", "intelephense" },
       automatic_enable = false,
     })
 
@@ -27,7 +27,7 @@ return {
       settings = { Lua = { diagnostics = { globals = { "vim" } } } },
     })
 
-    vim.lsp.enable({ "lua_ls", "gopls", "ts_ls", "rust_analyzer" })
+    vim.lsp.enable({ "lua_ls", "gopls", "ts_ls", "rust_analyzer", "intelephense" })
 
     vim.api.nvim_create_autocmd("LspAttach", {
       callback = function(args)

@@ -30,7 +30,7 @@ with another plugin then add the change, the date, and why it was needed in the 
 ## LSP
 
 - native `vim.lsp.enable`, configs from `nvim-lspconfig`, servers managed by `Mason`;
-- servers: `lua_ls`, `gopls`, `ts_ls` (Mason-installed), `rust_analyzer` (from PATH);
+- servers: `lua_ls`, `gopls`, `ts_ls`, `intelephense` (Mason-installed), `rust_analyzer` (from PATH);
 - config in `lua/plugins/lsp.lua`.
 
 ## Tests

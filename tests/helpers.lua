@@ -56,4 +56,18 @@ function M.make_rust_project()
 	return dir
 end
 
+-- Write a small PHP project (composer.json roots intelephense) to a temp dir.
+function M.make_php_project()
+	local dir = vim.fn.tempname()
+	vim.fn.mkdir(dir, "p")
+	local function put(path, body)
+		local f = assert(io.open(dir .. "/" .. path, "w"))
+		f:write(body)
+		f:close()
+	end
+	put("composer.json", '{"name": "e2e/e2e"}\n')
+	put("index.php", '<?php\nfunction greet($name) {\n    return "Hello, " . $name;\n}\n')
+	return dir
+end
+
 return M

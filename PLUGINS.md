@@ -4,14 +4,14 @@
 |---|---|---|---|---|
 | lazy.nvim | [folke/lazy.nvim](https://github.com/folke/lazy.nvim) | `init.lua` | lazy-lock.json | Plugin manager (bootstrapped) |
 | nvim-lspconfig | [neovim/nvim-lspconfig](https://github.com/neovim/nvim-lspconfig) | `lua/plugins/lsp.lua` | lazy-lock.json | LSP server configs for native `vim.lsp.enable` |
-| mason.nvim | [mason-org/mason.nvim](https://github.com/mason-org/mason.nvim) | `lua/plugins/lsp.lua` | lazy-lock.json | Installs LSP servers (lua_ls, gopls, ts_ls) |
+| mason.nvim | [mason-org/mason.nvim](https://github.com/mason-org/mason.nvim) | `lua/plugins/lsp.lua` | lazy-lock.json | Installs LSP servers (lua_ls, gopls, ts_ls, intelephense) |
 | mason-lspconfig.nvim | [mason-org/mason-lspconfig.nvim](https://github.com/mason-org/mason-lspconfig.nvim) | `lua/plugins/lsp.lua` | lazy-lock.json | Bridges Mason ↔ lspconfig |
 | trouble.nvim | [folke/trouble.nvim](https://github.com/folke/trouble.nvim) | `lua/plugins/trouble.lua` | lazy-lock.json | Diagnostics/quickfix/LSP list UI |
 | which-key.nvim | [folke/which-key.nvim](https://github.com/folke/which-key.nvim) | `lua/plugins/which-key.lua` | lazy-lock.json | Keybinding popup |
 | snacks.nvim | [folke/snacks.nvim](https://github.com/folke/snacks.nvim) | `lua/plugins/snacks.lua` | lazy-lock.json | QoL collection (notifier, bigfile, etc.) |
 | nvim-web-devicons | [nvim-tree/nvim-web-devicons](https://github.com/nvim-tree/nvim-web-devicons) | `lua/plugins/icons.lua` | lazy-lock.json | NerdFont glyphs |
 | catppuccin | [catppuccin/nvim](https://github.com/catppuccin/nvim) | `lua/plugins/catppuccin.lua` | lazy-lock.json | Colorscheme (mocha), loaded eagerly at startup |
-| ~~nvim-treesitter~~ | ~~[nvim-treesitter/nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter)~~ | `lua/config/treesitter.lua` | removed | **Removed.** master branch archived; queries conflicted with nvim 0.12.3 bundled parsers. Built-in treesitter used instead via FileType autocmd. |
+| nvim-treesitter | [nvim-treesitter/nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter) (branch `main`) | `lua/plugins/treesitter.lua` | `4916d6592ede8c07973490d9322f187e07dfefac` | Installs parsers + matching query files only; highlighting itself is native, started by `lua/config/treesitter.lua`'s FileType autocmd |
 | lualine.nvim | [nvim-lualine/lualine.nvim](https://github.com/nvim-lualine/lualine.nvim) | `lua/plugins/lualine.lua` | lazy-lock.json | Statusline (lazy: VeryLazy) |
 | blink.cmp | [saghen/blink.cmp](https://github.com/saghen/blink.cmp) | `lua/plugins/completion.lua` | lazy-lock.json | Completion engine; LSP capabilities wired in `lsp.lua` |
 | telescope.nvim | [nvim-telescope/telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) | `lua/plugins/telescope.lua` | lazy-lock.json | Fuzzy finder (lazy: cmd/keys) |
@@ -92,13 +92,25 @@ The warn module fires `vim.notify(WARN)` once per session when
 silent. Dependency-injected (check_fn, notify_fn) so unit-tested in
 `tests/e2e_spec.lua` ("markdown prettier warn:" tests).
 
-### nvim-treesitter — removed (2026-06-26)
+### nvim-treesitter — removed (2026-06-26), then reinstated on `main` (2026-07-06)
 
-Plugin removed; `lua/config/treesitter.lua` replaces it with a single `FileType` autocmd calling `vim.treesitter.start()`.
+**2026-06-26:** plugin removed; `lua/config/treesitter.lua` added a single `FileType` autocmd calling `vim.treesitter.start()`, with the belief that nvim 0.12.3 bundles enough parsers+queries on its own.
 
-**Why:** nvim-treesitter `master` branch was archived. Its bundled highlight queries referenced node types (e.g. `underscore` in gdscript) that don't exist in the parser binaries, causing `E5108` errors on every file open. nvim 0.12.3 bundles 37 parsers (lua, go, rust, typescript, gdscript, etc.) with matching queries; the plugin was redundant and broken.
+**Why removed:** nvim-treesitter's `master` branch was archived. Its bundled highlight queries referenced node types (e.g. `underscore` in gdscript) that don't exist in the parser binaries, causing `E5108` errors on every file open.
 
-**Trade-off:** No `:TSInstall`/`:TSUpdate` commands. Indent is nvim built-in (no treesitter-indent module). For languages not bundled with nvim, no parser auto-install.
+**Correction (2026-07-06):** the "nvim 0.12.3 bundles 37 parsers with matching queries" claim above was wrong — verified nvim 0.12.3 only ships bundled highlight queries for **7** languages (`c`, `lua`, `markdown`, `markdown_inline`, `query`, `vim`, `vimdoc`). Every other filetype relied on leftover parser binaries orphaned in `~/.local/share/nvim/site/parser` from the old plugin install. `vim.treesitter.start()` succeeds whenever a parser binary exists — even an orphan with no matching query — and that success **disables legacy regex `:syntax` highlighting** for the buffer. Net effect: PHP, Go, Rust, Python, YAML, JSON, HTML, TOML, and more rendered with **zero** highlighting (confirmed via `vim.treesitter.get_captures_at_pos` returning empty). CSS/JS/TS were the only ones still working, because `catppuccin` happens to ship its own query files for those three.
+
+**Fix:** reinstated `nvim-treesitter`, pinned to the `main` branch (see `lua/plugins/treesitter.lua`) — a full rewrite, actively maintained (unlike the frozen `master`), that does nothing but install parsers + their matching query files as one versioned pair per commit; it does not touch highlighting at all, so the existing `lua/config/treesitter.lua` FileType autocmd needed no changes. Because parser and query come from the same commit, the original `master`-branch mismatch (query referencing a node type the parser doesn't produce) can't recur the same way.
+
+**Gotcha hit during setup:** `require('nvim-treesitter').install()` treats a language as "already installed" (and silently skips it) if **either** its query directory **or** its parser file exists (`config.get_installed()` unions both listings). An interrupted first install left query dirs in place without compiled parsers for ~25 languages; every later `install()` call skipped them without error. Fixed by re-running with `{ force = true }` once. If highlighting for a specific language ever silently stops working again after an interrupted `:TSUpdate`, this is the first thing to check — look for a query dir under `~/.local/share/nvim/site/queries/<lang>` with no matching `<lang>.so` in `~/.local/share/nvim/site/parser`, and force-reinstall.
+
+**Trade-off:** none remaining — `:TSInstall`/`:TSUpdate` are back. Indent is still nvim built-in (no treesitter-indent module was enabled).
+
+### nvim-lspconfig — intelephense added for PHP (2026-07-06)
+
+Added `"intelephense"` to `ensure_installed` and `vim.lsp.enable({...})` in `lua/plugins/lsp.lua`.
+
+**Why:** intelephense was already installed via Mason but never referenced by `mason-lspconfig`'s `ensure_installed` or `vim.lsp.enable`, so it never attached to PHP buffers — a plain oversight, not a bug in any plugin. `nvim-lspconfig` already ships `lsp/intelephense.lua`, so no server-specific config was needed beyond enabling it.
 
 ### snacks.nvim — scope treesitter injections disabled
 

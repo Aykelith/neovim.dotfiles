@@ -254,6 +254,53 @@ T["rust_analyzer attaches and responds (LSP E2E)"] = function()
   end)
 end
 
+-- Full LSP chain E2E: open a PHP file, intelephense attaches.
+T["intelephense attaches (LSP E2E)"] = function()
+  with_child(function(c)
+    local dir = h.make_php_project()
+    h.lua(c, "vim.cmd.edit(...)", dir .. "/index.php")
+
+    local attached = h.wait(function()
+      return h.lua(c, "return #vim.lsp.get_clients({ name = 'intelephense' }) > 0")
+    end, 30000, 200)
+    assert(attached, "intelephense did not attach")
+  end)
+end
+
+-- Regression test: nvim-treesitter's `main` branch was reinstalled after
+-- orphaned parser binaries (leftover from the removed `master` branch) were
+-- found silently disabling ALL highlighting for languages with no matching
+-- query -- PHP, Go, Rust, Python, YAML, JSON, HTML, TOML, CSS/SCSS included.
+-- `vim.treesitter.start()` succeeds (parser present) which turns OFF legacy
+-- regex `syntax`, but with no query it renders nothing. Assert real captures
+-- come back for a representative sample; extmarks stay empty in headless
+-- mode with no UI attached, so query captures are the only reliable signal.
+T["treesitter highlights previously-broken filetypes"] = function()
+  with_child(function(c)
+    local samples = {
+      { ft = "php", body = { "<?php", '$name = "world";' }, row = 1, col = 1 },
+      { ft = "go", body = { "package main" }, row = 0, col = 1 },
+      { ft = "python", body = { "def f():", "    pass" }, row = 0, col = 1 },
+      { ft = "yaml", body = { "key: value" }, row = 0, col = 0 },
+    }
+    for _, s in ipairs(samples) do
+      h.lua(c, [[
+        vim.cmd.enew()
+        vim.bo.filetype = ...
+      ]], s.ft)
+      h.lua(c, "vim.api.nvim_buf_set_lines(0, 0, -1, false, ...)", s.body)
+      -- run.sh waits for all parsers to finish compiling before the suite
+      -- starts (see its "Waiting for treesitter parsers" step), so this only
+      -- needs to tolerate normal scheduling jitter, not a cold compile.
+      local caps = h.wait(function()
+        local n = h.lua(c, "return #vim.treesitter.get_captures_at_pos(0, ..., ...)", s.row, s.col)
+        return n > 0 and n
+      end, 15000, 100)
+      assert(caps, s.ft .. ": expected treesitter captures, got none")
+    end
+  end)
+end
+
 -- Real autocomplete E2E: minuet -> Ollama FIM -> inline ghost text appears.
 -- Gated behind $MINUET_E2E so the normal suite doesn't need the docker server
 -- running. The `run-autocomplete.sh` wrapper sets it after the container is up.
