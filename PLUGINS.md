@@ -80,6 +80,66 @@ respect (that's ripgrep's separate default, unaffected by `--hidden`) — a
 project-root `.ignore` file (ripgrep-native, same syntax as `.gitignore`) is
 the supported way to add extra excludes beyond git's own.
 
+### telescope.nvim — live grep + find files include/exclude path filters (2026-07-07)
+
+`<leader>fg` (Live Grep) and `<leader>ff` (Find Files) both open through
+`make_filterable_opener(display_name, builtin_name, build_picker_opts)` in
+`lua/plugins/telescope.lua` — a factory (not `:Telescope live_grep`/
+`:Telescope find_files` directly) shared by both pickers, since the
+filter/persistence/help behavior below is identical for both; only how a
+picker turns `exclude_dirs` into picker opts differs
+(`build_picker_opts`). `open_live_grep`/`open_find_files` are each one call
+to that factory.
+
+Inside either picker's prompt:
+- `<C-o>` asks (via `vim.fn.input`) for comma-separated paths to restrict
+  the search to (`search_dirs`, natively supported by both pickers).
+- `<C-e>` asks for comma-separated paths to exclude. Live Grep turns these
+  into `--glob=!path` via the native `glob_pattern` opt. `find_files` has
+  no equivalent native opt, so exclusion is done via a custom
+  `find_command` (`find_files_exclude_command`) that hardcodes ripgrep
+  (`rg --files --glob=!path ...`) — matching the ripgrep-only glob support
+  Live Grep already relies on. `hidden`/`search_dirs` etc. still get
+  applied on top by Telescope's own `find_files`, since that logic runs
+  after `opts.find_command` regardless of where the command list came
+  from.
+- Either key re-opens the picker with the updated filters, carrying over
+  the current query text.
+- `<C-g>` clears the query text and both filters and reopens fresh.
+
+The active filters are shown in the prompt window's border title
+(`Live Grep [... | in: ... | not in: ...]`) — read-only, since it's a
+border title rather than an editable field. The title also permanently
+shows `?: <C-/>`: Telescope already binds `<C-/>` (insert
+mode) / `?` (normal mode) to `actions.which_key`, a popup listing the
+current picker's keymaps — binding literal `?` directly was rejected since
+it would swallow `?` typed into a search query. The `<C-o>`/`<C-e>`/`<C-g>`
+mappings were given explicit `desc`s (e.g. `"Live Grep: only in paths"`,
+kept under ~30 chars so which-key's `name_width` column doesn't truncate
+them) so they show up there with a readable name instead of Telescope's
+best-effort anonymous-function name.
+
+Each picker keeps its own `last_search` table (query text + both filters),
+closed over per `make_filterable_opener` call, remembering across separate
+`<leader>fg`/`<leader>ff` presses (not just across `<C-o>`/`<C-e>`/`<C-g>`
+re-opens within one session): a buffer-local `TextChangedI`/`TextChanged`
+autocmd on the prompt keeps `last_search.text` current on every keystroke
+(so it survives however the picker closes — Esc, selecting a result,
+`<C-o>`/`<C-e>`/`<C-g>`...), and the picker re-opens with
+`last_search.include_dirs/exclude_dirs/text` instead of empty values. The
+prompt buffer's line includes the literal `prompt_prefix` (e.g. `"> "`), so
+it's stripped the same way Telescope's own `Picker:_get_prompt()` does
+before being stored.
+
+**Why:** the user wanted to scope/exclude both live grep and find-files
+results by path without retyping ripgrep flags; wanted visible confirmation
+of which paths were applied; wanted a discoverable way to find the
+shortcuts without memorizing them; wanted a quick way to start a brand new
+search instead of manually clearing the query and re-running `<C-o>`/`<C-e>`
+with empty input for each filter; and wanted the last query + filters to
+persist when reopening a picker rather than starting from a blank prompt
+each time.
+
 ### conform.nvim — markdown/mdx prettier warn-once (2026-06-28)
 
 `format_on_save` is a function; for markdown/mdx it calls

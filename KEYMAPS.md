@@ -31,6 +31,10 @@
 | **\<leader>fr** | n | `lua/plugins/telescope.lua` | Telescope: recent files |
 | **\<C-j>** | i | `lua/plugins/telescope.lua` | Telescope prompt: cycle to next search history entry |
 | **\<C-k>** | i | `lua/plugins/telescope.lua` | Telescope prompt: cycle to previous search history entry |
+| **\<C-o>** | i | `lua/plugins/telescope.lua` | Telescope live grep/find files: prompt for comma-separated paths to search only in (shown read-only in the prompt title) |
+| **\<C-e>** | i | `lua/plugins/telescope.lua` | Telescope live grep/find files: prompt for comma-separated paths to exclude from search (shown read-only in the prompt title) |
+| **\<C-/>** | i | telescope default (hinted by `lua/plugins/telescope.lua`'s `?:` prompt title) | Telescope: open which-key popup listing this picker's shortcuts (incl. \<C-o>/\<C-e>/\<C-g> above/below) |
+| **\<C-g>** | i | `lua/plugins/telescope.lua` | Telescope live grep/find files: clear the search text and both path filters, reopening a fresh search |
 | **\<leader>cf** | n | `lua/plugins/conform.lua` | Format buffer (conform) |
 | **]c** | n | `lua/plugins/gitsigns.lua` | Git: next hunk (buffer-local) |
 | **[c** | n | `lua/plugins/gitsigns.lua` | Git: prev hunk (buffer-local) |
