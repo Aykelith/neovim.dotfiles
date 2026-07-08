@@ -27,6 +27,14 @@ return {
       settings = { Lua = { diagnostics = { globals = { "vim" } } } },
     })
 
+    -- In the monorepo, root_markers checks '.git' before 'composer.json' by
+    -- default, so it resolves to the repo root instead of the nested PHP
+    -- project (e.g. admin/), pulling every project into intelephense's
+    -- workspace. Check composer.json first so nested projects stay scoped.
+    vim.lsp.config("intelephense", {
+      root_markers = { "composer.json", ".git" },
+    })
+
     vim.lsp.enable({ "lua_ls", "gopls", "ts_ls", "rust_analyzer", "intelephense" })
 
     vim.api.nvim_create_autocmd("LspAttach", {
