@@ -23,6 +23,7 @@
 | minuet-ai.nvim | [milanglacier/minuet-ai.nvim](https://github.com/milanglacier/minuet-ai.nvim) | `lua/plugins/minuet.lua` | v0.9.0 | Local LLM autocomplete (ghost text) via self-hosted Ollama / Qwen2.5-Coder (lazy: InsertEnter) |
 | bufferline.nvim | [akinsho/bufferline.nvim](https://github.com/akinsho/bufferline.nvim) | `lua/plugins/bufferline.lua` | lazy-lock.json | VSCode-style bufferline showing all open buffers as tabs (lazy: VeryLazy) |
 | grug-far.nvim | [MagicDuck/grug-far.nvim](https://github.com/MagicDuck/grug-far.nvim) | `lua/plugins/grug-far.lua` | lazy-lock.json | Multi-file search & replace with diff preview, ripgrep-backed (lazy: cmd/keys) |
+| nvim-dap | [mfussenegger/nvim-dap](https://github.com/mfussenegger/nvim-dap) | `lua/plugins/dap.lua` | `9e848e09a697ee95302a3ef2dd43fd6eb709e570` | Debugger (DAP). Connects to Godot 4's built-in DAP server (127.0.0.1:6006) for GDScript breakpoints/stepping; red circle gutter signs (lazy: ft gdscript) |
 
 ## Observations
 

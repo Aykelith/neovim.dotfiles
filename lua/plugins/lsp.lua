@@ -35,7 +35,16 @@ return {
       root_markers = { "composer.json", ".git" },
     })
 
-    vim.lsp.enable({ "lua_ls", "gopls", "ts_ls", "rust_analyzer", "intelephense" })
+    -- GDScript's LSP lives inside the running Godot editor (TCP 127.0.0.1:6005),
+    -- not a Mason binary. Connect natively so diagnostics/completion attach when
+    -- Godot is open on the project. GDScript_Port env overrides if Godot's
+    -- Editor Settings > Network > Language Server port differs.
+    vim.lsp.config("gdscript", {
+      cmd = vim.lsp.rpc.connect("127.0.0.1", tonumber(vim.env.GDScript_Port) or 6005),
+      root_markers = { "project.godot", ".git" },
+    })
+
+    vim.lsp.enable({ "lua_ls", "gopls", "ts_ls", "rust_analyzer", "intelephense", "gdscript" })
 
     vim.api.nvim_create_autocmd("LspAttach", {
       callback = function(args)

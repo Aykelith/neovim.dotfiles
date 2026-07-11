@@ -57,3 +57,9 @@
 | **\<leader>q** | n | `lua/config/keymaps.lua` | Close buffer |
 | **\<leader>sr** | n | `lua/plugins/grug-far.lua` | grug-far: search & replace across files |
 | **\<leader>sr** | v | `lua/plugins/grug-far.lua` | grug-far: search & replace within visual selection |
+| **\<leader>db** | n | `lua/plugins/dap.lua` | DAP: toggle breakpoint (red circle in gutter) |
+| **\<leader>dc** | n | `lua/plugins/dap.lua` | DAP: continue / start debugging |
+| **\<leader>do** | n | `lua/plugins/dap.lua` | DAP: step over |
+| **\<leader>di** | n | `lua/plugins/dap.lua` | DAP: step into |
+| **\<leader>dO** | n | `lua/plugins/dap.lua` | DAP: step out |
+| **\<leader>dt** | n | `lua/plugins/dap.lua` | DAP: terminate |

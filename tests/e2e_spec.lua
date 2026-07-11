@@ -761,6 +761,23 @@ T["intelephense attaches (LSP E2E)"] = function()
 	end)
 end
 
+-- GDScript's LSP is the running Godot editor (TCP 127.0.0.1:6005), not a Mason
+-- binary, so a live attach can't run in CI without Godot open. Assert the client
+-- is registered and enabled: TCP cmd (rpc.connect returns a function) and
+-- project.godot as a root marker. If this regresses, .gd buffers get no LSP.
+T["gdscript LSP client is configured and enabled"] = function()
+	with_child(function(c)
+		-- nvim-lspconfig lazy-loads on BufReadPre/BufNewFile; force it so the
+		-- config block (which registers gdscript) has run.
+		h.lua(c, "require('lazy').load({ plugins = { 'nvim-lspconfig' } })")
+		local cmd_type = h.lua(c, "return type(vim.lsp.config.gdscript.cmd)")
+		assert(cmd_type == "function", "gdscript cmd is not a TCP connect function")
+		local marker = h.lua(c, "return vim.tbl_contains(vim.lsp.config.gdscript.root_markers, 'project.godot')")
+		assert(marker, "gdscript root_markers missing project.godot")
+		assert(h.lua(c, "return vim.lsp.is_enabled('gdscript')"), "gdscript not enabled")
+	end)
+end
+
 -- Regression test: nvim-treesitter's `main` branch was reinstalled after
 -- orphaned parser binaries (leftover from the removed `master` branch) were
 -- found silently disabling ALL highlighting for languages with no matching
@@ -1179,6 +1196,31 @@ T["mermaid-live: places one hint extmark per mermaid fence"] = function()
 	local ns = vim.api.nvim_get_namespaces()["mermaid-live-hint"]
 	local marks = vim.api.nvim_buf_get_extmarks(buf, ns, 0, -1, {})
 	assert(#marks == 2, "expected 2 hints (mermaid fences only), got " .. #marks)
+end
+
+-- nvim-dap loads on a gdscript buffer, wires the Godot adapter, and the
+-- breakpoint hotkey places a red-circle sign in the gutter.
+T["dap: godot adapter loads on gdscript and toggle places a breakpoint sign"] = function()
+	with_child(function(c)
+		h.lua(c, "vim.cmd('enew'); vim.bo.filetype = 'gdscript'")
+		local loaded = h.wait(function()
+			return h.lua(c, "return package.loaded['dap'] ~= nil")
+		end)
+		assert(loaded, "nvim-dap did not load on gdscript ft")
+
+		assert(h.lua(c, "return require('dap').adapters.godot.port") == 6006, "godot adapter port")
+		assert(h.lua(c, "return require('dap').configurations.gdscript[1].type") == "godot", "gdscript config type")
+
+		local sign = h.lua(c, "return vim.fn.sign_getdefined('DapBreakpoint')[1].text")
+		assert(sign and sign:find("●"), "breakpoint sign text, got: " .. vim.inspect(sign))
+
+		-- The <leader>db hotkey toggles a breakpoint -> a sign gets placed.
+		h.input(c, " db")
+		local placed = h.wait(function()
+			return h.lua(c, "return #(vim.fn.sign_getplaced(0, {group='*'})[1].signs) > 0")
+		end)
+		assert(placed, "breakpoint hotkey did not place a sign")
+	end)
 end
 
 return T

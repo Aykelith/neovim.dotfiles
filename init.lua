@@ -23,6 +23,7 @@ require("config.treesitter")
 require("methods.win-move")
 require("config.keymaps")
 require("config.commands")
+require("config.godot-server")
 
 vim.filetype.add({
   extension = {
