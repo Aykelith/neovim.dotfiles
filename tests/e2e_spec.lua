@@ -685,6 +685,83 @@ T["Telescope find_files <C-e> actually excludes matching files from results"] = 
 	end)
 end
 
+-- Regression test: ripgrep's --glob uses gitignore syntax, where a leading
+-- "./" is a literal path segment rather than a cwd marker. A "./"-prefixed
+-- exclude path (as produced by e.g. typing "./skip") must still filter
+-- results, not silently match nothing.
+T["Telescope live_grep <C-e> with a './'-prefixed path actually excludes results"] = function()
+	with_child(function(c)
+		local dir = h.lua(
+			c,
+			[[
+      local d = vim.fn.tempname()
+      vim.fn.mkdir(d .. "/keep", "p")
+      vim.fn.mkdir(d .. "/skip", "p")
+      local function put(path)
+        local f = assert(io.open(path, "w"))
+        f:write("needle\n")
+        f:close()
+      end
+      put(d .. "/keep/a.txt")
+      put(d .. "/skip/b.txt")
+      return d
+    ]]
+		)
+		h.lua(c, "vim.cmd.cd(...)", dir)
+
+		h.input(c, " fg")
+		assert(h.wait(function()
+			return h.lua(c, "return vim.bo.buftype")
+		end, 5000) == "prompt", "live_grep prompt did not open")
+
+		h.input(c, "<C-e>")
+		assert(h.wait(function()
+			return h.lua(c, "return vim.api.nvim_get_mode().mode")
+		end, 3000) == "c", "<C-e> did not open an input prompt")
+		h.input(c, "./skip<CR>")
+		local function current_title()
+			return h.lua(
+				c,
+				[[
+        local ok, picker = pcall(
+          require("telescope.actions.state").get_current_picker,
+          vim.api.nvim_get_current_buf()
+        )
+        return ok and picker and picker.prompt_title or nil
+      ]]
+			)
+		end
+		assert(
+			h.wait(function()
+				local t = current_title()
+				return t ~= nil and t:find("not in: ./skip", 1, true) and t
+			end, 3000),
+			"exclude filter not applied"
+		)
+
+		h.input(c, "needle")
+
+		local function results_text()
+			return h.lua(
+				c,
+				[[
+        local picker = require("telescope.actions.state").get_current_picker(vim.api.nvim_get_current_buf())
+        return table.concat(vim.api.nvim_buf_get_lines(picker.results_bufnr, 0, -1, false), "\n")
+      ]]
+			)
+		end
+
+		local kept = h.wait(function()
+			local t = results_text()
+			return t:find("a.txt", 1, true) and t
+		end, 5000)
+		assert(kept, "expected keep/a.txt in results, got: " .. vim.inspect(results_text()))
+		assert(not results_text():find("b.txt", 1, true), "./skip/b.txt was not excluded from results")
+
+		h.input(c, "<C-c>")
+	end)
+end
+
 -- gitsigns + treesitter highlight engage when a real file opens.
 T["gitsigns loads on file open"] = function()
 	with_child(function(c)

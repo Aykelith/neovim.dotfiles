@@ -28,6 +28,15 @@ local function filter_title(display_name, include_dirs, exclude_dirs)
 	return display_name .. " [" .. table.concat(parts, " | ") .. "]"
 end
 
+--- Ripgrep's `--glob` uses gitignore syntax, where a leading "./" is a
+--- literal path segment rather than a cwd marker -- it silently prevents
+--- any match against the "./"-prefixed paths ripgrep reports for a
+--- "./dir"-style search root, so an exclude like "!./app/client/styles"
+--- never matches anything. Strip it before building a glob.
+local function strip_leading_dot_slash(path)
+	return (path:gsub("^%./", ""))
+end
+
 --- `find_files` has no `glob_pattern` support (unlike `live_grep`), so
 --- excludes are done via a custom `find_command` (ripgrep-only, matching
 --- the ripgrep-only glob support live_grep already relies on).
@@ -35,7 +44,7 @@ local function find_files_exclude_command(exclude_dirs)
 	return function()
 		local cmd = { "rg", "--files", "--color", "never" }
 		for _, dir in ipairs(exclude_dirs) do
-			table.insert(cmd, "--glob=!" .. dir)
+			table.insert(cmd, "--glob=!" .. strip_leading_dot_slash(dir))
 		end
 		return cmd
 	end
@@ -122,7 +131,7 @@ local open_live_grep = make_filterable_opener("Live Grep", "live_grep", function
 	if exclude_dirs and #exclude_dirs > 0 then
 		glob_pattern = {}
 		for _, dir in ipairs(exclude_dirs) do
-			table.insert(glob_pattern, "!" .. dir)
+			table.insert(glob_pattern, "!" .. strip_leading_dot_slash(dir))
 		end
 	end
 	return {
