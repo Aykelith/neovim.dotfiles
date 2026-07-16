@@ -14,5 +14,7 @@ keymap("n", "<leader>e", function()
 	Snacks.explorer()
 end, { noremap = true, silent = true, desc = "File Explorer (cwd)" })
 
--- Buffer close
-keymap("n", "<leader>q", ":bdelete<CR>", { noremap = true, silent = true, desc = "Close buffer" })
+-- Buffer close (keeps split windows open, see methods/close-buffer.lua)
+keymap("n", "<leader>q", function()
+	require("methods.close-buffer").close()
+end, { noremap = true, silent = true, desc = "Close buffer" })

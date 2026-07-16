@@ -28,6 +28,12 @@ return {
           jump = {
             close = true,
           },
+          actions = {
+            -- Open the item under cursor in the OS default app (image viewer, etc.)
+            open_in_app = function(_, item)
+              if item and item.file then vim.ui.open(item.file) end
+            end,
+          },
           layout = {
             preset = "default",
           },
@@ -52,6 +58,7 @@ return {
             list = {
               keys = {
                 ["<CR>"] = { "tab", mode = { "n", "i" } },
+                ["O"] = "open_in_app",
               },
             },
           },
