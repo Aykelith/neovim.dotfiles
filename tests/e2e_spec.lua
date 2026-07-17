@@ -1300,4 +1300,53 @@ T["dap: godot adapter loads on gdscript and toggle places a breakpoint sign"] = 
 	end)
 end
 
+-- Selecting an identifier and hitting the case hotkeys rewrites it in place.
+T["case-convert: visual hotkeys rewrite the selection"] = function()
+	with_child(function(c)
+		local cases = {
+			{ keys = " cs", want = "get_http_response" },
+			{ keys = " cS", want = "GET_HTTP_RESPONSE" },
+			{ keys = " cc", want = "GetHttpResponse" },
+			{ keys = " ck", want = "get-http-response" },
+		}
+		for _, case in ipairs(cases) do
+			h.lua(c, "vim.cmd('enew!'); vim.api.nvim_buf_set_lines(0, 0, -1, false, {'getHTTPResponse'})")
+			h.input(c, "viw" .. case.keys)
+			local got = h.wait(function()
+				return h.lua(c, "return vim.api.nvim_get_current_line()") == case.want
+			end)
+			assert(got, case.keys .. ": got " .. vim.inspect(h.lua(c, "return vim.api.nvim_get_current_line()")))
+		end
+	end)
+end
+
+-- Every case round-trips back to snake_case: the splitter reads its own output.
+T["case-convert: styles round-trip through the splitter"] = function()
+	with_child(function(c)
+		-- No standalone-digit word: CamelCase cannot encode the "_2" boundary
+		-- in "foo_2", so that one legitimately does not round-trip.
+		local snake = "get_utf8_http_response"
+		for _, style in ipairs({ "snake", "upper_snake", "camel", "kebab" }) do
+			local out = h.lua(
+				c,
+				[[
+					local line, style = ...
+					local m = require('methods.case-convert')
+					vim.cmd('enew!')
+					vim.api.nvim_buf_set_lines(0, 0, -1, false, { line })
+					-- Linewise: kebab output has no keyword chars for viw to grab.
+					vim.cmd('normal! ggV')
+					m.convert(style)
+					vim.cmd('normal! ggV')
+					m.convert('snake')
+					return vim.api.nvim_get_current_line()
+				]],
+				snake,
+				style
+			)
+			assert(out == snake, style .. " round-trip got: " .. vim.inspect(out))
+		end
+	end)
+end
+
 return T

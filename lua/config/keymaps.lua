@@ -18,3 +18,11 @@ end, { noremap = true, silent = true, desc = "File Explorer (cwd)" })
 keymap("n", "<leader>q", function()
 	require("methods.close-buffer").close()
 end, { noremap = true, silent = true, desc = "Close buffer" })
+
+-- Visual --
+-- Case conversion of the selection, see methods/case-convert.lua
+for key, style in pairs({ cs = "snake", cS = "upper_snake", cc = "camel", ck = "kebab" }) do
+	keymap("v", "<leader>" .. key, function()
+		require("methods.case-convert").convert(style)
+	end, { noremap = true, silent = true, desc = "Case: " .. style })
+end

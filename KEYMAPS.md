@@ -57,6 +57,10 @@
 | **\\[** | n | `lua/plugins/bufferline.lua` | Previous buffer |
 | **\\]** | n | `lua/plugins/bufferline.lua` | Next buffer |
 | **\<leader>q** | n | `lua/config/keymaps.lua` | Close buffer |
+| **\<leader>cs** | v | `lua/config/keymaps.lua` | Case: convert selection to snake_case |
+| **\<leader>cS** | v | `lua/config/keymaps.lua` | Case: convert selection to SNAKE_CASE |
+| **\<leader>cc** | v | `lua/config/keymaps.lua` | Case: convert selection to CamelCase |
+| **\<leader>ck** | v | `lua/config/keymaps.lua` | Case: convert selection to kebab-case |
 | **\<leader>sr** | n | `lua/plugins/grug-far.lua` | grug-far: search & replace across files |
 | **\<leader>sr** | v | `lua/plugins/grug-far.lua` | grug-far: search & replace within visual selection |
 | **\<leader>db** | n | `lua/plugins/dap.lua` | DAP: toggle breakpoint (red circle in gutter) |
