@@ -325,8 +325,8 @@ T["Telescope live_grep <C-/> shows the path-filter shortcuts in which-key"] = fu
 end
 
 -- Re-entering Live Grep (a fresh <leader>fg, not <C-o>/<C-e>) must reapply
--- the last query text and path filters instead of starting empty.
-T["Telescope live_grep reapplies last query and filters on re-entry"] = function()
+-- the last path filters, but start with an empty query text.
+T["Telescope live_grep reapplies filters but clears query on re-entry"] = function()
 	with_child(function(c)
 		local function current_title()
 			return h.lua(
@@ -398,7 +398,8 @@ T["Telescope live_grep reapplies last query and filters on re-entry"] = function
 			"live_grep prompt did not close"
 		)
 
-		-- Re-enter Live Grep from scratch: text + include filter must both persist.
+		-- Re-enter Live Grep from scratch: the include filter must persist, but
+		-- the query text must start empty.
 		h.input(c, " fg")
 		assert(h.wait(function()
 			return h.lua(c, "return vim.bo.buftype")
@@ -408,11 +409,14 @@ T["Telescope live_grep reapplies last query and filters on re-entry"] = function
 			return t ~= nil and t:find("in: lua/plugins", 1, true) and t
 		end, 3000)
 		assert(reopened_title, "include filter lost on re-entry, got: " .. vim.inspect(current_title()))
-		local reopened_text = h.wait(function()
-			local t = prompt_text()
-			return t == "needle" and t
-		end, 3000)
-		assert(reopened_text, "query text lost on re-entry, got: " .. vim.inspect(prompt_text()))
+		-- The prompt should be empty; wait briefly to be sure no stale text
+		-- reappears, then assert it stayed empty.
+		assert(
+			not h.wait(function()
+				return prompt_text() ~= "" and true or nil
+			end, 1000),
+			"query text should be cleared on re-entry, got: " .. vim.inspect(prompt_text())
+		)
 
 		h.input(c, "<C-c>")
 	end)

@@ -57,14 +57,15 @@ end
 ---   - <C-g>: clear the query text and both path filters.
 ---   - <C-/>: Telescope's built-in which-key popup, hinted by "?" in the
 ---     title, listing the above with readable names.
----   - Persistence of the last query text and both filters across separate
----     invocations (not just <C-o>/<C-e> re-opens within one session), so
----     re-opening resumes where the picker last left off.
+---   - Persistence of both path filters across separate invocations (not just
+---     <C-o>/<C-e> re-opens within one session), so re-opening resumes the
+---     same filters. The query text is NOT persisted: re-opening starts with
+---     an empty search input.
 --- `build_picker_opts(include_dirs, exclude_dirs)` returns the
 --- picker-specific opts (e.g. `search_dirs`/`glob_pattern` for live_grep,
 --- `search_dirs`/`find_command` for find_files).
 local function make_filterable_opener(display_name, builtin_name, build_picker_opts)
-	local last_search = { text = nil, include_dirs = nil, exclude_dirs = nil }
+	local last_search = { include_dirs = nil, exclude_dirs = nil }
 
 	local open
 	open = function(include_dirs, exclude_dirs, default_text)
@@ -74,24 +75,11 @@ local function make_filterable_opener(display_name, builtin_name, build_picker_o
 
 		last_search.include_dirs = include_dirs
 		last_search.exclude_dirs = exclude_dirs
-		last_search.text = default_text
 
 		local picker_opts = build_picker_opts(include_dirs, exclude_dirs)
 		picker_opts.default_text = default_text
 		picker_opts.prompt_title = filter_title(display_name, include_dirs, exclude_dirs)
 		picker_opts.attach_mappings = function(prompt_bufnr, map)
-			-- Keep last_search.text current on every keystroke so it survives
-			-- however the picker closes (Esc, selecting a result, <C-o>/<C-e>...).
-			-- The prompt buffer's line includes the literal prompt_prefix (e.g.
-			-- "> "), so strip it the same way Picker:_get_prompt() does.
-			vim.api.nvim_create_autocmd({ "TextChangedI", "TextChanged" }, {
-				buffer = prompt_bufnr,
-				callback = function()
-					local picker = action_state.get_current_picker(prompt_bufnr)
-					local line = vim.api.nvim_buf_get_lines(prompt_bufnr, 0, 1, false)[1] or ""
-					last_search.text = line:sub(#picker.prompt_prefix + 1)
-				end,
-			})
 			map("i", "<C-o>", function(bufnr)
 				local current_text = action_state.get_current_line()
 				actions.close(bufnr)
@@ -120,9 +108,10 @@ local function make_filterable_opener(display_name, builtin_name, build_picker_o
 		builtin[builtin_name](picker_opts)
 	end
 
-	-- What `<leader>f?` should call: resume with whatever was last used.
+	-- What `<leader>f?` should call: resume with the last filters, but with an
+	-- empty search input.
 	return function()
-		open(last_search.include_dirs, last_search.exclude_dirs, last_search.text)
+		open(last_search.include_dirs, last_search.exclude_dirs, nil)
 	end
 end
 
