@@ -52,12 +52,12 @@ return {
           win = {
             input = {
               keys = {
-                ["<CR>"] = { "tab", mode = { "n", "i" } },
+                ["<CR>"] = { "tabdrop", mode = { "n", "i" } },
               },
             },
             list = {
               keys = {
-                ["<CR>"] = { "tab", mode = { "n", "i" } },
+                ["<CR>"] = { "tabdrop", mode = { "n", "i" } },
                 ["O"] = "open_in_app",
               },
             },

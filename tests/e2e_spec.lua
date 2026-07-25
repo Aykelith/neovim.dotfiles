@@ -1049,7 +1049,7 @@ T["snacks explorer <CR> opens file in new tab"] = function()
 		end, 3000)
 		assert(on_file, "could not find a file item in snacks explorer")
 
-		-- Confirm the selected entry; config maps <CR> -> "tab" action.
+		-- Confirm the selected entry; config maps <CR> -> "tabdrop" action.
 		h.input(c, "<CR>")
 
 		-- A second tab must appear.
@@ -1058,6 +1058,93 @@ T["snacks explorer <CR> opens file in new tab"] = function()
 			return n and n > 1 and n
 		end, 3000)
 		assert(tabs, "no new tab after <CR> in snacks explorer (tab count stayed at 1)")
+	end)
+end
+
+-- Reopening a file that is already visible in another tab must jump to that tab,
+-- not stack up a duplicate one (the "tabdrop" half of the <CR> mapping).
+T["snacks explorer <CR> reuses the tab of an already-open file"] = function()
+	with_child(function(c)
+		assert(h.lua(c, "return package.loaded['snacks'] ~= nil"), "snacks not loaded")
+
+		-- Non-empty buffer in tab 1, plus a temp dir holding exactly one file.
+		h.lua(c, "vim.cmd.edit(...)", "tests/helpers.lua")
+		local tmpdir = h.lua(
+			c,
+			[[
+      local dir = vim.fn.tempname()
+      vim.fn.mkdir(dir, "p")
+      local fh = assert(io.open(dir .. "/target.lua", "w"))
+      fh:write("return {}\n")
+      fh:close()
+      return dir
+    ]]
+		)
+
+		-- Open that file in tab 2, then go back to tab 1.
+		h.lua(c, "vim.cmd('tabnew ' .. vim.fn.fnameescape(... .. '/target.lua')); vim.cmd('tabnext 1')", tmpdir)
+		assert(h.lua(c, "return vim.fn.tabpagenr('$')") == 2, "setup failed: expected 2 tabs")
+
+		h.lua(c, "require('snacks').picker.explorer({ cwd = ... })", tmpdir)
+
+		local ready = h.wait(function()
+			return h.lua(
+				c,
+				[[
+        for _, win in ipairs(vim.api.nvim_list_wins()) do
+          local buf = vim.api.nvim_win_get_buf(win)
+          if vim.bo[buf].filetype:match("snacks") then
+            vim.api.nvim_set_current_win(win)
+            return true
+          end
+        end
+        return false
+      ]]
+			)
+		end, 5000)
+		assert(ready, "snacks picker did not open")
+
+		-- Land on target.lua (first item is the root dir node).
+		local on_file = h.wait(function()
+			return h.lua(
+				c,
+				[[
+        local ok, pickers = pcall(function() return require('snacks.picker').get() end)
+        if not ok or #pickers == 0 then return false end
+        local p = pickers[1]
+        if p:count() == 0 then return false end
+        local item = p:current()
+        if item and item.dir then
+          p.list:move(1)
+          item = p:current()
+        end
+        return item ~= nil and not item.dir and item.file:match("target%.lua") ~= nil
+      ]]
+			)
+		end, 3000)
+		assert(on_file, "could not select target.lua in snacks explorer")
+
+		h.input(c, "<CR>")
+
+		-- We must end up in tab 2 on that file, with no third tab created.
+		local jumped = h.wait(function()
+			return h.lua(
+				c,
+				[[
+        return vim.fn.tabpagenr('$') == 2
+          and vim.fn.tabpagenr() == 2
+          and vim.api.nvim_buf_get_name(0):match("target%.lua") ~= nil
+      ]]
+			)
+		end, 3000)
+		assert(
+			jumped,
+			"explorer <CR> did not reuse the existing tab (tabs="
+				.. tostring(h.lua(c, "return vim.fn.tabpagenr('$')"))
+				.. ", current="
+				.. tostring(h.lua(c, "return vim.fn.tabpagenr()"))
+				.. ")"
+		)
 	end)
 end
 

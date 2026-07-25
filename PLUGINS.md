@@ -178,3 +178,18 @@ Added `"intelephense"` to `ensure_installed` and `vim.lsp.enable({...})` in `lua
 `scope.treesitter.injections` set to `false` in `lua/plugins/snacks.lua`.
 
 **Why:** nvim 0.12.3 has a bug in async treesitter parsing with injection queries. When opening a markdown file, snacks scope triggered an async parse with injections enabled (the default). During injection query evaluation, `vim.treesitter.get_range(node)` was called with a nil `TSNode`, crashing with `E5108: attempt to call method 'range' (a nil value)`. Disabling injections stops snacks from passing `range=true` to the async parser, avoiding the nil node path. Injections are only meaningful for multi-language files (Vue, JSX templates); Go/Lua/Rust/TS are unaffected.
+
+### snacks.nvim — explorer `<CR>` uses `tabdrop` instead of `tab` (2026-07-25)
+
+`picker.sources.explorer.win.input.keys` and `...win.list.keys` map `<CR>` to
+the `tabdrop` action in `lua/plugins/snacks.lua` (previously `tab`).
+
+**Why:** the `tab` action resolves to `tab sbuffer`, which unconditionally opens
+a new tabpage — reopening a file that was already open from the explorer piled up
+duplicate tabpages (visible as extra tabs in bufferline's top-right indicator).
+`tabdrop` resolves to `tab drop`, which snacks detects as a "drop" command
+(`snacks/picker/actions.lua`, `is_drop`): it first searches every tabpage for a
+non-floating window already showing the buffer and jumps there, and only falls
+back to `tab sbuffer` when the file isn't open anywhere. First open still lands
+in a new tab; reopening now switches to the existing one. `jump.reuse_win` does
+not help here — it is gated on `cmd == "buffer"` and is inert for tab actions.
