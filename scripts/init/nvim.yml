@@ -9,6 +9,17 @@
     nvim_tarball: "/tmp/nvim-linux-x86_64.tar.gz"
 
   tasks:
+    # On macOS Neovim comes from Homebrew; the tarball flow below is Linux-only.
+    - name: Install or update Neovim (macOS)
+      community.general.homebrew:
+        name: neovim
+        state: latest
+      when: ansible_os_family == "Darwin"
+
+    - name: Stop here on macOS
+      ansible.builtin.meta: end_host
+      when: ansible_os_family == "Darwin"
+
     - name: Check PATH contains ~/local-apps/nvim/bin
       ansible.builtin.shell: |
         echo "$PATH" | tr ':' '\n' | grep -qxF "{{ nvim_install_dir }}/bin"

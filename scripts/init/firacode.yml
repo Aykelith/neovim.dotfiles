@@ -10,9 +10,19 @@
     reinstall: false  # pass -e reinstall=true to force
 
   tasks:
+    - name: Install FiraCode Nerd Font (macOS)
+      community.general.homebrew_cask:
+        name: font-fira-code-nerd-font
+        state: "{{ 'latest' if reinstall | bool else 'present' }}"
+      when: ansible_os_family == "Darwin"
+
+    - name: Stop here on macOS
+      ansible.builtin.meta: end_host
+      when: ansible_os_family == "Darwin"
+
     - name: Abort on non-Debian systems
       ansible.builtin.fail:
-        msg: "This playbook only supports Debian-based distros."
+        msg: "This playbook only supports Debian-based distros and macOS."
       when: ansible_os_family != "Debian"
 
     - name: Ensure fontconfig is available

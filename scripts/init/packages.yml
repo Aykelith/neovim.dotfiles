@@ -16,3 +16,16 @@
           - xclip
           - ripgrep
         state: present
+      when: ansible_os_family != "Darwin"
+
+    # Homebrew refuses to run as root, so no become here. tar/unzip ship with
+    # macOS, pbcopy replaces xclip, and compilers come from the Xcode CLT.
+    - name: Ensure base packages are present (macOS)
+      community.general.homebrew:
+        name:
+          - git
+          - curl
+          - wget
+          - ripgrep
+        state: present
+      when: ansible_os_family == "Darwin"

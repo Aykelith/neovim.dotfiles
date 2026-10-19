@@ -18,7 +18,8 @@ if ! command -v ansible-playbook >/dev/null 2>&1; then
 fi
 
 # ── Sudo password (collected once, passed to all playbooks) ──────────────────
-if [[ $EUID -ne 0 ]]; then
+# Not needed on macOS: Homebrew installs run as the user, never with become.
+if [[ $EUID -ne 0 && "$(uname)" != "Darwin" ]]; then
   read -rsp "sudo password (for package installs): " _sudo_pass
   echo ""
   export ANSIBLE_BECOME_PASS="$_sudo_pass"
