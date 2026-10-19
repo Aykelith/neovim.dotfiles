@@ -27,5 +27,7 @@
           - curl
           - wget
           - ripgrep
+          # nvim-treesitter (main) compiles parsers with it; needs >= 0.26.1
+          - tree-sitter-cli
         state: present
       when: ansible_os_family == "Darwin"
