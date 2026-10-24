@@ -165,6 +165,8 @@ silent. Dependency-injected (check_fn, notify_fn) so unit-tested in
 
 **Gotcha hit during setup:** `require('nvim-treesitter').install()` treats a language as "already installed" (and silently skips it) if **either** its query directory **or** its parser file exists (`config.get_installed()` unions both listings). An interrupted first install left query dirs in place without compiled parsers for ~25 languages; every later `install()` call skipped them without error. Fixed by re-running with `{ force = true }` once. If highlighting for a specific language ever silently stops working again after an interrupted `:TSUpdate`, this is the first thing to check — look for a query dir under `~/.local/share/nvim/site/queries/<lang>` with no matching `<lang>.so` in `~/.local/share/nvim/site/parser`, and force-reinstall.
 
+**`Error during "tree-sitter build"` (2026-10-24):** `main` branch compiles parsers with the `tree-sitter` CLI. Mason's `tree-sitter-cli` prebuilt binary requires glibc 2.39 (Debian 12 has 2.36) and fails to run, and since Mason prepends its bin dir to nvim's PATH it shadows any working copy. Fix: uninstalled Mason's `tree-sitter-cli`, built the CLI locally with `cargo install --locked tree-sitter-cli` (`~/.cargo/bin`). Do not reinstall it via Mason.
+
 **Trade-off:** none remaining — `:TSInstall`/`:TSUpdate` are back. Indent is still nvim built-in (no treesitter-indent module was enabled).
 
 ### nvim-lspconfig — intelephense added for PHP (2026-07-06)
