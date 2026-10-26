@@ -40,6 +40,11 @@ service is down it prompts the user to start it once, then swallows further erro
 errors pass through unchanged. The gate core is dependency-injected (check/prompt/
 now) so it's unit-tested without systemd — see `tests/e2e_spec.lua` ("error gate:" tests).
 
+**2026-10-26:** on macOS there is no `systemctl`, so the probe crashed with
+`ENOENT ... 'systemctl'` inside minuet's notify. When `systemctl` isn't
+executable the probe now curls the Ollama server (`<host>/api/tags`) instead,
+and the start prompt points at `local-autocomplete/start.sh`.
+
 ### nvim-lspconfig — `LspInfo`/`LspStart`/`LspRestart`/`LspStop` do not exist on this Nvim (2026-07-03)
 
 No config change; documenting expected behavior so it isn't "fixed" again by

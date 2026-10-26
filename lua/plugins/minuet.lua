@@ -111,17 +111,25 @@ return {
 		-- warn/error notifications via the injectable core in methods/.
 		local utils = require("minuet.utils")
 		local orig_notify = utils.notify
+		-- systemd only exists on Linux; elsewhere (macOS) there's no service unit,
+		-- so probe the server itself, same as health_check above.
+		local has_systemd = vim.fn.executable("systemctl") == 1
 		local function check_service(cb)
-			vim.system({ "systemctl", "is-active", "--quiet", "local-autocomplete" }, {}, function(res)
+			local cmd = has_systemd and { "systemctl", "is-active", "--quiet", "local-autocomplete" }
+				or { "curl", "-sf", "-m", "2", host .. "/api/tags" }
+			vim.system(cmd, {}, function(res)
 				vim.schedule(function()
 					cb(res.code == 0)
 				end)
 			end)
 		end
 		local function prompt_start()
+			local how = has_systemd and "`sudo systemctl start local-autocomplete`"
+				or "local-autocomplete/start.sh"
 			vim.notify(
 				"minuet: local-autocomplete service is not running — start it with "
-					.. "`sudo systemctl start local-autocomplete` (errors silenced until it's up)",
+					.. how
+					.. " (errors silenced until it's up)",
 				vim.log.levels.WARN
 			)
 		end
